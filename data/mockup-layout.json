@@ -1,0 +1,22 @@
+{
+  "selectionRule": {
+    "cream": "lightShirtAsset",
+    "navy": "darkShirtAsset",
+    "black": "darkShirtAsset"
+  },
+  "product": {
+    "front": {"xPercent": 32, "yPercent": 21, "widthPercent": 36, "heightPercent": 55},
+    "back": {"xPercent": 32, "yPercent": 18, "widthPercent": 36, "heightPercent": 57}
+  },
+  "model": {
+    "front": {"xPercent": 36, "yPercent": 29, "widthPercent": 28, "heightPercent": 37},
+    "back": {"xPercent": 36, "yPercent": 25, "widthPercent": 28, "heightPercent": 40}
+  },
+  "rendering": {
+    "objectFit": "contain",
+    "artBlendMode": "multiply",
+    "darkShirtLightInkBlendMode": "normal",
+    "preserveAspectRatio": true,
+    "allowCrop": false
+  }
+}

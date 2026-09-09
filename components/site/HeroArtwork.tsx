@@ -1,0 +1,2 @@
+/** Replace only these source paths when the corrected transparent artwork arrives. */
+export function HeroArtwork(){return <picture className="hero-art"><source media="(max-width:900px)" srcSet="/assets/hero/hero-face-mobile.webp"/><source media="(max-width:1200px)" srcSet="/assets/hero/hero-face-tablet.webp"/><img src="/assets/hero/hero-face-desktop.webp" alt="Expressive, hand-drawn character with wild hair and a delighted smile" fetchPriority="high"/></picture>}

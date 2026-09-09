@@ -1,0 +1,5 @@
+export type Colour='navy'|'black'|'cream';
+export type Side='front'|'back';
+export type View='product'|'model';
+export type Design={id:string;slug:string;name:string;category:string;description:string;tags:string[];lightShirtAsset:string;darkShirtAsset:string;thumbnail:string;published?:boolean;available?:boolean;createdAt?:string;colours?:Colour[];sides?:Side[];sizes?:string[];featured?:boolean};
+export type RequestRecord={id:string;name:string;phone:string;email?:string;description:string;colour:Colour;side:Side|'both';size:string;quantity:number;view?:View;designId?:string;uploadId?:string;uploadName?:string;createdAt:string;neededBy?:string;status:string;orderStatus?:string;available:boolean;notes:string;quote?:number;readyDate?:string;proposal?:string;checks?:string[];activity:{text:string;at:string}[]};

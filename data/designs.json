@@ -1,0 +1,79 @@
+[
+  {
+    "id": "IWBI-001",
+    "slug": "never-alone",
+    "name": "Never Alone",
+    "category": "Typography",
+    "description": "A distressed eye graphic about the unseen battles people carry.",
+    "tags": ["typography", "streetwear", "monochrome"],
+    "lightShirtAsset": "../designs/never-alone/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/never-alone/master/print-dark-shirt.png",
+    "thumbnail": "../designs/never-alone/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-002",
+    "slug": "street-duck",
+    "name": "Street Duck",
+    "category": "Graphic",
+    "description": "A bold urban duck character with a music-first streetwear attitude.",
+    "tags": ["graphic", "character", "streetwear"],
+    "lightShirtAsset": "../designs/street-duck/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/street-duck/master/print-dark-shirt.png",
+    "thumbnail": "../designs/street-duck/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-003",
+    "slug": "coffee-energy",
+    "name": "Coffee Energy",
+    "category": "Typography",
+    "description": "A playful chalkboard equation for people powered by coffee.",
+    "tags": ["coffee", "typography", "minimal"],
+    "lightShirtAsset": "../designs/coffee-energy/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/coffee-energy/master/print-dark-shirt.png",
+    "thumbnail": "../designs/coffee-energy/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-004",
+    "slug": "slow-pace",
+    "name": "Slow Pace",
+    "category": "Graphic",
+    "description": "A relaxed turtle reminding everyone that good things take time.",
+    "tags": ["character", "fun", "typography"],
+    "lightShirtAsset": "../designs/slow-pace/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/slow-pace/master/print-dark-shirt.png",
+    "thumbnail": "../designs/slow-pace/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-005",
+    "slug": "human-evolution",
+    "name": "Human Evolution",
+    "category": "Minimal",
+    "description": "A cosmic sequence that moves from galaxies to the human form.",
+    "tags": ["cosmic", "minimal", "monochrome"],
+    "lightShirtAsset": "../designs/human-evolution/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/human-evolution/master/print-dark-shirt.png",
+    "thumbnail": "../designs/human-evolution/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-006",
+    "slug": "the-climb",
+    "name": "The Climb",
+    "category": "Minimal",
+    "description": "A vertical rope composition inspired by struggle, support and reaching higher.",
+    "tags": ["minimal", "climb", "line-art"],
+    "lightShirtAsset": "../designs/the-climb/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/the-climb/master/print-dark-shirt.png",
+    "thumbnail": "../designs/the-climb/web/gallery-thumbnail.webp"
+  },
+  {
+    "id": "IWBI-007",
+    "slug": "justice",
+    "name": "Justice",
+    "category": "Editorial",
+    "description": "A classical winged figure composed as a modern editorial print.",
+    "tags": ["editorial", "statue", "grayscale"],
+    "lightShirtAsset": "../designs/justice/master/print-light-shirt.png",
+    "darkShirtAsset": "../designs/justice/master/print-dark-shirt.png",
+    "thumbnail": "../designs/justice/web/gallery-thumbnail.webp"
+  }
+]

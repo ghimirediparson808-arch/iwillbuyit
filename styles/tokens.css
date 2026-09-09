@@ -1,0 +1,17 @@
+:root {
+  --iwbi-navy: #062e59;
+  --iwbi-navy-deep: #032342;
+  --iwbi-navy-soft: #164875;
+  --iwbi-ivory: #faf7f0;
+  --iwbi-cream-shirt: #f2eadb;
+  --iwbi-black-shirt: #111111;
+  --iwbi-white: #ffffff;
+  --iwbi-ink: #102a43;
+  --iwbi-muted: #6f7f91;
+  --iwbi-border: #d9e2ec;
+  --iwbi-success: #16855b;
+  --iwbi-warning: #d48218;
+  --iwbi-danger: #c73a3a;
+  --iwbi-radius-card: 28px;
+  --iwbi-radius-pill: 999px;
+}
