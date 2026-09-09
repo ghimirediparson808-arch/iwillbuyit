@@ -9,3 +9,4 @@ qa/*.png
 .npm-cache/
 
 .next-production/
+qa/*.log

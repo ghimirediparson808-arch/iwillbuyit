@@ -1,4 +1,77 @@
-'use client';
-import {useEffect,useRef} from 'react';
-import {X} from 'lucide-react';
-export function Modal({title,children,onClose}:{title:string;children:React.ReactNode;onClose:()=>void}){const ref=useRef<HTMLDivElement>(null);useEffect(()=>{const previous=document.activeElement as HTMLElement;const el=ref.current;el?.focus();const onKey=(e:KeyboardEvent)=>{if(e.key==='Escape')onClose();if(e.key==='Tab'){const focusables=el?.querySelectorAll<HTMLElement>('button,a,input,textarea,select,[tabindex="0"]');if(!focusables?.length)return;const first=focusables[0],last=focusables[focusables.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}};document.addEventListener('keydown',onKey);const overflow=document.body.style.overflow;document.body.style.overflow='hidden';return()=>{document.removeEventListener('keydown',onKey);document.body.style.overflow=overflow;previous?.focus();};},[onClose]);return <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)onClose();}}><div className="modal" role="dialog" aria-modal="true" aria-label={title} tabIndex={-1} ref={ref}><button className="icon-button" aria-label="Close dialog" onClick={onClose}><X/></button><h2>{title}</h2>{children}</div></div>}
+"use client";
+import { useEffect, useRef } from "react";
+import { X } from "lucide-react";
+export function Modal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const closeRef = useRef(onClose);
+  closeRef.current = onClose;
+  useEffect(() => {
+    const previous = document.activeElement as HTMLElement;
+    const el = ref.current;
+    el?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closeRef.current();
+      if (e.key === "Tab") {
+        const focusables = el?.querySelectorAll<HTMLElement>(
+          'button:not(:disabled),a[href],input:not(:disabled),textarea:not(:disabled),select:not(:disabled),[tabindex="0"]',
+        );
+        if (!focusables?.length) return;
+        const first = focusables[0],
+          last = focusables[focusables.length - 1];
+        if (
+          e.shiftKey &&
+          (document.activeElement === first || document.activeElement === el)
+        ) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = overflow;
+      previous?.focus();
+    };
+  }, []);
+  return (
+    <div
+      className="modal-backdrop"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div
+        className="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        tabIndex={-1}
+        ref={ref}
+      >
+        <button
+          className="icon-button"
+          aria-label="Close dialog"
+          onClick={onClose}
+        >
+          <X />
+        </button>
+        <h2>{title}</h2>
+        {children}
+      </div>
+    </div>
+  );
+}

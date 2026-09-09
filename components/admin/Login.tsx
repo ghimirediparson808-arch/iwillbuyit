@@ -1,8 +1,150 @@
-'use client';
-import Link from 'next/link';
-import {useRouter} from 'next/navigation';
-import {useState} from 'react';
-import {Eye,EyeOff,ShieldCheck,ArrowLeft,FilePenLine,MessageCircle,Box} from 'lucide-react';
-import {Eyebrow} from '@/components/site/Decorations';
-import {demoAuth} from '@/services/auth';
-export function Login(){const [visible,setVisible]=useState(false);const [error,setError]=useState('');const [busy,setBusy]=useState(false);const router=useRouter();return <main id="main" className="login-page"><svg width="0" height="0" className="clip-defs" aria-hidden="true"><defs><clipPath id="login-wave" clipPathUnits="objectBoundingBox"><path d="M0 0 H1 C.86 .13 .89 .35 .96 .5 C1.06 .76 .87 .88 .76 1 H0 Z"/></clipPath><clipPath id="login-mobile-wave" clipPathUnits="objectBoundingBox"><path d="M0 0 H1 V.86 C.63 1.13 .33 .81 0 .915 Z"/></clipPath></defs></svg><section className="login-brand"><img className="login-logo" src="/assets/brand/logo-navbar.webp" alt="I WILL BUY IT"/><Eyebrow>PRIVATE WORKSPACE</Eyebrow><h1>Run the brand<br/>from one place.</h1><p>Designs, requests, orders and sales—all in one place.</p><ul><li><FilePenLine/>Design Library</li><li><MessageCircle/>Customer Requests</li><li><Box/>Order Tracking</li></ul><img className="login-curve" src="/assets/svg/curve-swoosh-top.svg" alt=""/></section><section className="login-form"><h2>Admin Portal</h2><p className="login-subtitle">Demo access for I WILL BUY IT</p><form onSubmit={e=>{e.preventDefault();const data=new FormData(e.currentTarget);setError('');setBusy(true);try{demoAuth.signIn(String(data.get('email')),String(data.get('password')),data.has('remember'));router.replace('/admin');}catch(e){setError((e as Error).message);setBusy(false);}}}><label className="field">Admin email<input type="email" required name="email" placeholder="admin@iwillbuyit.com" autoComplete="username"/></label><label className="field">Password<span className="password-input"><input type={visible?'text':'password'} required name="password" placeholder="••••••••••••••" autoComplete="current-password"/><button type="button" className="icon-button" aria-label={visible?'Hide password':'Show password'} onClick={()=>setVisible(!visible)}>{visible?<EyeOff/>:<Eye/>}</button></span></label><label className="check-label"><input type="checkbox" name="remember" defaultChecked/>Keep me signed in on this device</label>{error&&<p className="error" role="alert">{error}</p>}<button className="button" type="submit" disabled={busy}>{busy?'Signing in…':'Sign In'}</button></form><p className="demo-note"><ShieldCheck/>Frontend demo · not secure authentication</p><Link className="return-link" href="/"><ArrowLeft/>Return to website</Link><details className="demo-credentials"><summary>Demo sign-in details</summary><p>Email: {demoAuth.email}<br/>Password: {demoAuth.password}</p></details></section></main>}
+"use client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import {
+  Eye,
+  EyeOff,
+  ShieldCheck,
+  ArrowLeft,
+  FilePenLine,
+  MessageCircle,
+  Box,
+} from "lucide-react";
+import { Eyebrow } from "@/components/site/Decorations";
+import { demoAuth } from "@/services/auth";
+export function Login() {
+  const [visible, setVisible] = useState(false);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
+  return (
+    <main id="main" className="login-page">
+      <svg width="0" height="0" className="clip-defs" aria-hidden="true">
+        <defs>
+          <clipPath id="login-wave" clipPathUnits="objectBoundingBox">
+            <path d="M0 0 H1 C.86 .13 .89 .35 .96 .5 C1.06 .76 .87 .88 .76 1 H0 Z" />
+          </clipPath>
+          <clipPath id="login-mobile-wave" clipPathUnits="objectBoundingBox">
+            <path d="M0 0 H1 V.86 C.63 1.13 .33 .81 0 .915 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+      <section className="login-brand">
+        <img
+          className="login-logo"
+          src="/assets/brand/logo-navbar.webp"
+          alt="I WILL BUY IT"
+        />
+        <Eyebrow>PRIVATE WORKSPACE</Eyebrow>
+        <h1>
+          Run the brand
+          <br />
+          from one place.
+        </h1>
+        <p>Designs, requests, orders and sales—all in one place.</p>
+        <ul>
+          <li>
+            <FilePenLine />
+            Design Library
+          </li>
+          <li>
+            <MessageCircle />
+            Customer Requests
+          </li>
+          <li>
+            <Box />
+            Order Tracking
+          </li>
+        </ul>
+        <img
+          className="login-curve"
+          src="/assets/svg/curve-swoosh-top.svg"
+          alt=""
+        />
+      </section>
+      <section className="login-form">
+        <h2>Admin Portal</h2>
+        <p className="login-subtitle">Demo access for I WILL BUY IT</p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = new FormData(e.currentTarget);
+            setError("");
+            setBusy(true);
+            try {
+              demoAuth.signIn(
+                String(data.get("email")),
+                String(data.get("password")),
+                data.has("remember"),
+              );
+              router.replace("/admin");
+            } catch (e) {
+              setError((e as Error).message);
+              setBusy(false);
+            }
+          }}
+        >
+          <label className="field">
+            Admin email
+            <input
+              type="email"
+              required
+              name="email"
+              placeholder="admin@iwillbuyit.com"
+              autoComplete="username"
+            />
+          </label>
+          <label className="field">
+            Password
+            <span className="password-input">
+              <input
+                type={visible ? "text" : "password"}
+                required
+                name="password"
+                placeholder="••••••••••••••"
+                autoComplete="current-password"
+              />
+              <button
+                type="button"
+                className="icon-button"
+                aria-label={visible ? "Hide password" : "Show password"}
+                onClick={() => setVisible(!visible)}
+              >
+                {visible ? <EyeOff /> : <Eye />}
+              </button>
+            </span>
+          </label>
+          <label className="check-label">
+            <input type="checkbox" name="remember" defaultChecked />
+            Keep me signed in on this device
+          </label>
+          {error && (
+            <p className="error" role="alert">
+              {error}
+            </p>
+          )}
+          <button className="button" type="submit" disabled={busy}>
+            {busy ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+        <p className="demo-note">
+          <ShieldCheck />
+          Frontend demo · not secure authentication
+        </p>
+        <Link className="return-link" href="/">
+          <ArrowLeft />
+          Return to website
+        </Link>
+        <details className="demo-credentials">
+          <summary>Demo sign-in details</summary>
+          <p>
+            Email: {demoAuth.email}
+            <br />
+            Password: {demoAuth.password}
+          </p>
+        </details>
+      </section>
+    </main>
+  );
+}

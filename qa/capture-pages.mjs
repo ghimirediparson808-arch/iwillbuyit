@@ -1,6 +1,59 @@
-import {chromium} from '@playwright/test';
-import fs from 'node:fs';
-const specs={landing:['/',[1672,941],[1672,941],[853,1844]],gallery:['/designs',[1672,941],[1086,1448],[853,1844]],detail:['/designs/the-climb',[1672,941],[1086,1449],[853,1844]],customize:['/customize',[1672,941],[1086,1448],[851,1847]],login:['/admin/login',[1672,941],[1448,1086],[853,1844]],dashboard:['/admin',[1672,941],[1449,1086],[850,1850]],create:['/admin/designs/new',[1672,941],[1448,1086],[887,1774]],requests:['/admin/requests',[1672,941],[1448,1086],[881,1785]]};
-const browser=await chromium.launch({args:['--no-sandbox']});const context=await browser.newContext();await context.addInitScript(()=>{localStorage.setItem('iwbi-demo-session','demo');localStorage.removeItem('iwbi-theme');});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});page.on('response',r=>{if(r.status()>=400)errors.push(r.status()+' '+r.url());});
-for(const name of process.argv.slice(2).length?process.argv.slice(2):Object.keys(specs)){const [route,...sizes]=specs[name];for(let i=0;i<sizes.length;i++){const [width,height]=sizes[i];await page.setViewportSize({width,height});await page.goto('http://localhost:3000'+route);if(route.startsWith('/admin')&&route!=='/admin/login')await page.locator('.admin-content').waitFor({timeout:30000});await page.evaluate(()=>document.fonts.ready);await page.waitForTimeout(750);await page.screenshot({path:`qa/${name}-${['desktop','tablet','mobile'][i]}.png`});console.log(name,width,height,await page.evaluate(()=>({overflow:document.documentElement.scrollWidth>innerWidth,broken:[...document.images].filter(im=>!im.complete||im.naturalWidth===0).map(im=>im.src)})));}}
-fs.writeFileSync('qa/browser-errors.json',JSON.stringify(errors,null,2));console.log('Runtime errors:',errors);await browser.close();
+import { chromium } from "@playwright/test";
+import fs from "node:fs";
+const specs = {
+  landing: ["/", [1672, 941], [1672, 941], [853, 1844]],
+  gallery: ["/designs", [1672, 941], [1086, 1448], [853, 1844]],
+  detail: ["/designs/the-climb", [1672, 941], [1086, 1449], [853, 1844]],
+  customize: ["/customize", [1672, 941], [1086, 1448], [851, 1847]],
+  login: ["/admin/login", [1672, 941], [1448, 1086], [853, 1844]],
+  dashboard: ["/admin", [1672, 941], [1449, 1086], [850, 1850]],
+  create: ["/admin/designs/new", [1672, 941], [1448, 1086], [887, 1774]],
+  requests: ["/admin/requests", [1672, 941], [1448, 1086], [881, 1785]],
+};
+const browser = await chromium.launch({ args: ["--no-sandbox"] });
+const context = await browser.newContext();
+await context.addInitScript(() => {
+  localStorage.setItem("iwbi-demo-session", "demo");
+  localStorage.removeItem("iwbi-theme");
+});
+const page = await context.newPage();
+page.setDefaultNavigationTimeout(60000);
+const errors = [];
+page.on("pageerror", (e) => errors.push(e.message));
+page.on("console", (m) => {
+  if (m.type() === "error") errors.push(m.text());
+});
+page.on("response", (r) => {
+  if (r.status() >= 400) errors.push(r.status() + " " + r.url());
+});
+for (const name of process.argv.slice(2).length
+  ? process.argv.slice(2)
+  : Object.keys(specs)) {
+  const [route, ...sizes] = specs[name];
+  for (let i = 0; i < sizes.length; i++) {
+    const [width, height] = sizes[i];
+    await page.setViewportSize({ width, height });
+    await page.goto("http://localhost:3000" + route);
+    if (route.startsWith("/admin") && route !== "/admin/login")
+      await page.locator(".admin-content").waitFor({ timeout: 30000 });
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(750);
+    await page.screenshot({
+      path: `qa/${name}-${["desktop", "tablet", "mobile"][i]}.png`,
+    });
+    console.log(
+      name,
+      width,
+      height,
+      await page.evaluate(() => ({
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        broken: [...document.images]
+          .filter((im) => !im.complete || im.naturalWidth === 0)
+          .map((im) => im.src),
+      })),
+    );
+  }
+}
+fs.writeFileSync("qa/browser-errors.json", JSON.stringify(errors, null, 2));
+console.log("Runtime errors:", errors);
+await browser.close();

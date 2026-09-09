@@ -1,15 +1,280 @@
-'use client';
-import Link from 'next/link';
-import {useState} from 'react';
-import {ChevronDown,Search} from 'lucide-react';
-import {useAsset,useDesigns} from '@/lib/hooks';
-import {Mockup} from './Mockup';
-import {ColourControl,Quantity,Segmented} from './Controls';
-import {Eyebrow} from '@/components/site/Decorations';
-import {Modal} from '@/components/Modal';
-import {newRequest,repository,whatsappUrl} from '@/services/repository';
-import type {Colour,Side,View} from '@/types';
-export function DesignDetail({slug}:{slug:string}){const designs=useDesigns();const design=designs.find(d=>d.slug===slug);const [colour,setColour]=useState<Colour>('navy');const [side,setSide]=useState<Side>('front');const [view,setView]=useState<View>('product');const [size,setSize]=useState('M');const [quantity,setQuantity]=useState(1);const [modal,setModal]=useState<'zoom'|'size'|'request'|null>(null);const [expanded,setExpanded]=useState(false);const [success,setSuccess]=useState('');const [error,setError]=useState('');const art=useAsset(design?.darkShirtAsset.replace('/master/print-','/web/detail-').replace('.png','.webp'));if(!design)return <main id="main" className="empty-state"><h1>Design not found</h1><p>This design may be a draft or may no longer be available.</p><Link className="button" href="/designs">Explore Designs</Link></main>;
- const message=`Hi I WILL BUY IT! I’d like ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}. Please confirm availability and price.`;
- return <main id="main" className="detail-main"><nav className="breadcrumb" aria-label="Breadcrumb"><Link href="/designs">Design Gallery</Link><span>/</span><strong>{design.name}</strong></nav><div className="detail-grid"><section className={`original-art panel ${expanded?'expanded':''}`}><button className="original-toggle" onClick={()=>setExpanded(!expanded)} aria-expanded={expanded}><img src={art||design.thumbnail} alt=""/><span><Eyebrow>ORIGINAL ARTWORK</Eyebrow><span>Design {design.id}</span></span><ChevronDown/></button><div className="original-content"><Eyebrow>ORIGINAL ARTWORK</Eyebrow><div className="original-image"><img src={art||design.thumbnail} alt={`${design.name}, original artwork`}/></div><p>Design {design.id}</p></div></section><section className="preview-panel panel" aria-label="Live T-shirt preview"><Segmented label="Preview view" value={view} onChange={setView} options={[{value:'product',label:'T-shirt'},{value:'model',label:'Try on Model'}]}/><div className="large-mockup"><Mockup design={design} colour={colour} side={side} view={view}/></div><div className="preview-bottom"><Segmented label="Preview side" value={side} onChange={setSide} options={[{value:'front',label:'Front'},{value:'back',label:'Back'}]}/><button className="icon-button zoom" aria-label="Enlarge preview" onClick={()=>setModal('zoom')}><Search/></button></div></section><section className="detail-info panel"><div className="detail-title"><h1>{design.name}</h1><span className="badge">{design.available===false?'UNAVAILABLE':'AVAILABLE'}</span><p>{design.description}</p></div><div className="detail-controls"><div className="colour-group"><span className="group-label">T-shirt colour</span><ColourControl value={colour} onChange={setColour} allowed={design.colours}/></div><div className="size-group"><span className="group-label">Choose size</span><div className="size-line"><Segmented label="Shirt size" value={size} onChange={setSize} options={(design.sizes||['S','M','L','XL','XXL']).map(s=>({value:s,label:s}))}/><button className="text-link" onClick={()=>setModal('size')}>Size guide</button></div></div><div className="quantity-group"><span className="group-label">Quantity</span><Quantity value={quantity} onChange={setQuantity}/></div><div className="side-group"><span className="group-label">Print side</span><Segmented label="Print side" value={side} onChange={setSide} options={(design.sides||['front','back']).map(s=>({value:s,label:s==='front'?'Front':'Back'}))}/></div><div className="detail-actions"><p>Price confirmed after your request.</p><button className="button" disabled={design.available===false} onClick={()=>{setSuccess('');setModal('request');}}>Request This Design</button><a className="button secondary" href={whatsappUrl(message)} target="_blank" rel="noreferrer"><img src="/assets/svg/whatsapp-outline.svg" alt=""/>Ask on WhatsApp</a></div></div></section></div>{modal==='zoom'&&<Modal title={`${design.name} — ${colour}, ${side}`} onClose={()=>setModal(null)}><Mockup design={design} colour={colour} side={side} view={view}/></Modal>}{modal==='size'&&<Modal title="Size guide" onClose={()=>setModal(null)}><p>Our unisex T-shirts come in S, M, L, XL and XXL. Choose your usual size for a relaxed fit, or size up for an oversized look.</p><p className="size-note">Tell us your preferred fit with your request. We’ll confirm the garment’s exact measurements before your order is placed.</p></Modal>}{modal==='request'&&<Modal title={success?'Request received':'Request this design'} onClose={()=>setModal(null)}>{success?<div className="success" role="status">Your request {success} is saved. We’ll review your selected design and confirm the price.<Link className="button" href="/designs">Browse more designs</Link></div>:<form onSubmit={e=>{e.preventDefault();setError('');const values=new FormData(e.currentTarget);const phone=String(values.get('phone'));if(phone.replace(/\D/g,'').length<7){setError('Enter a valid contact number.');return;}try{const request=newRequest({name:String(values.get('name')).trim(),phone,description:message,colour,side,view,size,quantity,designId:design.id});repository.saveRequest(request);setSuccess(request.id);}catch(e){setError((e as Error).message);}}}><p>{design.name} · {colour} · {side} · {size} · {quantity} {quantity===1?'shirt':'shirts'}</p><label className="field">Your name<input required name="name" minLength={2} autoComplete="name"/></label><label className="field">WhatsApp number<input required name="phone" type="tel" autoComplete="tel"/></label>{error&&<p className="error" role="alert">{error}</p>}<button className="button" type="submit">Submit request</button></form>}</Modal>}</main>;
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ChevronDown, Search } from "lucide-react";
+import { useAsset, useDesigns, useSettings } from "@/lib/hooks";
+import { Mockup } from "./Mockup";
+import { ColourControl, Quantity, Segmented } from "./Controls";
+import { Eyebrow } from "@/components/site/Decorations";
+import { Modal } from "@/components/Modal";
+import { newRequest, repository, whatsappUrl } from "@/services/repository";
+import type { Colour, Side, View } from "@/types";
+export function DesignDetail({ slug }: { slug: string }) {
+  const settings = useSettings();
+  const designs = useDesigns();
+  const design = designs.find((d) => d.slug === slug);
+  const [colour, setColour] = useState<Colour>("navy");
+  const [side, setSide] = useState<Side>("front");
+  const [view, setView] = useState<View>("product");
+  const [size, setSize] = useState("M");
+  const [quantity, setQuantity] = useState(1);
+  const [modal, setModal] = useState<"zoom" | "size" | "request" | null>(null);
+  const [expanded, setExpanded] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const art = useAsset(
+    design?.darkShirtAsset
+      .replace("/master/print-", "/web/detail-")
+      .replace(".png", ".webp"),
+  );
+  useEffect(() => {
+    if (!design) return;
+    if (design.colours?.length && !design.colours.includes(colour))
+      setColour(design.colours[0]);
+    if (design.sides?.length && !design.sides.includes(side))
+      setSide(design.sides[0]);
+    if (design.sizes?.length && !design.sizes.includes(size))
+      setSize(design.sizes[0]);
+  }, [design, colour, side, size]);
+  if (!design)
+    return (
+      <main id="main" className="empty-state">
+        <h1>Design not found</h1>
+        <p>This design may be a draft or may no longer be available.</p>
+        <Link className="button" href="/designs">
+          Explore Designs
+        </Link>
+      </main>
+    );
+  const message = `Hi I WILL BUY IT! I’d like ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}. Please confirm availability and price.`;
+  return (
+    <main id="main" className="detail-main">
+      <nav className="breadcrumb" aria-label="Breadcrumb">
+        <Link href="/designs">Design Gallery</Link>
+        <span>/</span>
+        <strong>{design.name}</strong>
+      </nav>
+      <div className="detail-grid">
+        <section className={`original-art panel ${expanded ? "expanded" : ""}`}>
+          <button
+            className="original-toggle"
+            onClick={() => setExpanded(!expanded)}
+            aria-expanded={expanded}
+          >
+            <img src={art || design.thumbnail} alt="" />
+            <span>
+              <Eyebrow>ORIGINAL ARTWORK</Eyebrow>
+              <span>Design {design.id}</span>
+            </span>
+            <ChevronDown />
+          </button>
+          <div className="original-content">
+            <Eyebrow>ORIGINAL ARTWORK</Eyebrow>
+            <div className="original-image">
+              <img
+                src={art || design.thumbnail}
+                alt={`${design.name}, original artwork`}
+              />
+            </div>
+            <p>Design {design.id}</p>
+          </div>
+        </section>
+        <section
+          className="preview-panel panel"
+          aria-label="Live T-shirt preview"
+        >
+          <Segmented
+            label="Preview view"
+            value={view}
+            onChange={setView}
+            options={[
+              { value: "product", label: "T-shirt" },
+              { value: "model", label: "Try on Model" },
+            ]}
+          />
+          <div className="large-mockup">
+            <Mockup design={design} colour={colour} side={side} view={view} />
+          </div>
+          <div className="preview-bottom">
+            <Segmented
+              label="Preview side"
+              value={side}
+              onChange={setSide}
+              options={(design.sides || ["front", "back"]).map((s) => ({
+                value: s,
+                label: s === "front" ? "Front" : "Back",
+              }))}
+            />
+            <button
+              className="icon-button zoom"
+              aria-label="Enlarge preview"
+              onClick={() => setModal("zoom")}
+            >
+              <Search />
+            </button>
+          </div>
+        </section>
+        <section className="detail-info panel">
+          <div className="detail-title">
+            <h1>{design.name}</h1>
+            <span className="badge">
+              {design.available === false ? "UNAVAILABLE" : "AVAILABLE"}
+            </span>
+            <p>{design.description}</p>
+          </div>
+          <div className="detail-controls">
+            <div className="colour-group">
+              <span className="group-label">T-shirt colour</span>
+              <ColourControl
+                value={colour}
+                onChange={setColour}
+                allowed={design.colours}
+              />
+            </div>
+            <div className="size-group">
+              <span className="group-label">Choose size</span>
+              <div className="size-line">
+                <Segmented
+                  label="Shirt size"
+                  value={size}
+                  onChange={setSize}
+                  options={(design.sizes || ["S", "M", "L", "XL", "XXL"]).map(
+                    (s) => ({ value: s, label: s }),
+                  )}
+                />
+                <button className="text-link" onClick={() => setModal("size")}>
+                  Size guide
+                </button>
+              </div>
+            </div>
+            <div className="quantity-group">
+              <span className="group-label">Quantity</span>
+              <Quantity value={quantity} onChange={setQuantity} />
+            </div>
+            <div className="side-group">
+              <span className="group-label">Print side</span>
+              <Segmented
+                label="Print side"
+                value={side}
+                onChange={setSide}
+                options={(design.sides || ["front", "back"]).map((s) => ({
+                  value: s,
+                  label: s === "front" ? "Front" : "Back",
+                }))}
+              />
+            </div>
+            <div className="detail-actions">
+              <p>Price confirmed after your request.</p>
+              <button
+                className="button"
+                disabled={design.available === false}
+                onClick={() => {
+                  setSuccess("");
+                  setModal("request");
+                }}
+              >
+                Request This Design
+              </button>
+              <a
+                className="button secondary"
+                href={whatsappUrl(message, settings.whatsapp)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img src="/assets/svg/whatsapp-outline.svg" alt="" />
+                Ask on WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
+      </div>
+      {modal === "zoom" && (
+        <Modal
+          title={`${design.name} — ${colour}, ${side}`}
+          onClose={() => setModal(null)}
+        >
+          <Mockup design={design} colour={colour} side={side} view={view} />
+        </Modal>
+      )}
+      {modal === "size" && (
+        <Modal title="Size guide" onClose={() => setModal(null)}>
+          <p>
+            Our unisex T-shirts come in S, M, L, XL and XXL. Choose your usual
+            size for a relaxed fit, or size up for an oversized look.
+          </p>
+          <p className="size-note">
+            Tell us your preferred fit with your request. We’ll confirm the
+            garment’s exact measurements before your order is placed.
+          </p>
+        </Modal>
+      )}
+      {modal === "request" && (
+        <Modal
+          title={success ? "Request received" : "Request this design"}
+          onClose={() => setModal(null)}
+        >
+          {success ? (
+            <div className="success" role="status">
+              Your request {success} is saved. We’ll review your selected design
+              and confirm the price.
+              <Link className="button" href="/designs">
+                Browse more designs
+              </Link>
+            </div>
+          ) : (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                setError("");
+                const values = new FormData(e.currentTarget);
+                const phone = String(values.get("phone"));
+                if (phone.replace(/\D/g, "").length < 7) {
+                  setError("Enter a valid contact number.");
+                  return;
+                }
+                try {
+                  const request = newRequest({
+                    name: String(values.get("name")).trim(),
+                    phone,
+                    description: message,
+                    colour,
+                    side,
+                    view,
+                    size,
+                    quantity,
+                    designId: design.id,
+                  });
+                  repository.saveRequest(request);
+                  setSuccess(request.id);
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            >
+              <p>
+                {design.name} · {colour} · {side} · {size} · {quantity}{" "}
+                {quantity === 1 ? "shirt" : "shirts"}
+              </p>
+              <label className="field">
+                Your name
+                <input required name="name" minLength={2} autoComplete="name" />
+              </label>
+              <label className="field">
+                WhatsApp number
+                <input required name="phone" type="tel" autoComplete="tel" />
+              </label>
+              {error && (
+                <p className="error" role="alert">
+                  {error}
+                </p>
+              )}
+              <button className="button" type="submit">
+                Submit request
+              </button>
+            </form>
+          )}
+        </Modal>
+      )}
+    </main>
+  );
 }

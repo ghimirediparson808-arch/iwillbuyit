@@ -1,4 +1,42 @@
-import { useId } from 'react';
-export function Eyebrow({children}:{children:string}){const id=useId();return <svg className="eyebrow" viewBox="0 0 360 88" role="img" aria-label={children}><defs><path id={id} d="M18 54 Q180 -8 342 54"/></defs><text fill="currentColor" fontSize="19" letterSpacing="3"><textPath href={`#${id}`} startOffset="50%" textAnchor="middle">{children}</textPath></text><path d="M80 69 Q210 25 274 54 Q309 72 252 79" fill="none" stroke="currentColor" strokeWidth="1.6"/></svg>}
-export function PageCurves(){return <div className="page-curves" aria-hidden="true"><img src="/assets/svg/curve-swoosh-top.svg" alt=""/><img src="/assets/svg/curve-swoosh-top.svg" alt=""/></div>}
-export function BottomWave(){return <div className="bottom-wave" aria-hidden="true"><img src="/assets/svg/curve-swoosh-top.svg" alt=""/></div>}
+import { useId } from "react";
+export function Eyebrow({ children }: { children: string }) {
+  const id = useId();
+  return (
+    <svg
+      className="eyebrow"
+      viewBox="0 0 360 88"
+      role="img"
+      aria-label={children}
+    >
+      <defs>
+        <path id={id} d="M18 54 Q180 -8 342 54" />
+      </defs>
+      <text fill="currentColor" fontSize="19" letterSpacing="3">
+        <textPath href={`#${id}`} startOffset="50%" textAnchor="middle">
+          {children}
+        </textPath>
+      </text>
+      <path
+        d="M80 69 Q210 25 274 54 Q309 72 252 79"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+      />
+    </svg>
+  );
+}
+export function PageCurves() {
+  return (
+    <div className="page-curves" aria-hidden="true">
+      <img src="/assets/svg/curve-swoosh-top.svg" alt="" />
+      <img src="/assets/svg/curve-swoosh-top.svg" alt="" />
+    </div>
+  );
+}
+export function BottomWave() {
+  return (
+    <div className="bottom-wave" aria-hidden="true">
+      <img src="/assets/svg/curve-swoosh-top.svg" alt="" />
+    </div>
+  );
+}

@@ -1,9 +1,197 @@
-'use client';
-import Link from 'next/link';
-import {usePathname,useRouter} from 'next/navigation';
-import {useEffect,useState} from 'react';
-import {LayoutDashboard,FilePenLine,MessageCircle,Box,Users,Tag,ChartNoAxesColumnIncreasing,Settings,ExternalLink,LogOut,Menu,Bell,X,Search} from 'lucide-react';
-import {demoAuth} from '@/services/auth';
-const items=[{url:'/admin',label:'Dashboard',icon:LayoutDashboard},{url:'/admin/designs',label:'Designs',icon:FilePenLine},{url:'/admin/requests',label:'Custom Requests',icon:MessageCircle},{url:'/admin/requests?tab=orders',label:'Orders',icon:Box},{url:'/admin/customers',label:'Customers',icon:Users},{url:'/admin/inventory',label:'Inventory',icon:Tag},{url:'/admin/analytics',label:'Analytics',icon:ChartNoAxesColumnIncreasing},{url:'/admin/settings',label:'Settings',icon:Settings}];
-export function AdminShell({children}:{children:React.ReactNode}){const path=usePathname();const router=useRouter();const [ready,setReady]=useState(false);const [open,setOpen]=useState(false);useEffect(()=>{if(!demoAuth.signedIn())router.replace('/admin/login');else setReady(true);},[router]);function logout(){demoAuth.signOut();router.replace('/admin/login');}if(!ready)return <main id="main" className="empty-state" role="status">Opening your workspace…</main>;return <div className={`admin-shell ${path.includes('/designs/new')?'create-shell':''} ${path.includes('/requests')?'requests-shell':''}`}><header className="admin-mobile-header"><button className="icon-button" aria-label="Open admin menu" onClick={()=>setOpen(!open)}>{open?<X/>:<Menu/>}</button><Link href="/admin"><img src="/assets/brand/logo-navbar.webp" alt="I WILL BUY IT"/></Link><Link className="icon-button" href="/admin/requests" aria-label="View new requests"><Bell/></Link><Link href="/admin/settings" className="avatar" aria-label="Admin profile">A</Link></header><aside className={`admin-sidebar ${open?'open':''}`}><Link href="/admin" className="admin-brand"><img src="/assets/brand/logo-navbar.webp" alt="I WILL BUY IT"/></Link><nav aria-label="Admin navigation">{items.map(({url,label,icon:Icon})=><Link key={label} href={url} title={label} className={(url==='/admin'?path===url:!url.includes('?')&&path.startsWith(url))?'selected':''} onClick={()=>setOpen(false)}><Icon/><span>{label}</span></Link>)}</nav><div className="sidebar-bottom"><Link href="/"><ExternalLink/><span>View Website</span></Link><button onClick={logout}><LogOut/><span>Log Out</span></button></div></aside>{open&&<button className="sidebar-scrim" aria-label="Close admin menu" onClick={()=>setOpen(false)}/>}<main id="main" className="admin-content">{children}</main></div>}
-export function AdminHeading({title,subtitle,search=true}:{title:string;subtitle?:React.ReactNode;search?:boolean}){const router=useRouter();return <header className="admin-heading"><div><h1>{title}</h1>{subtitle&&<p>{subtitle}</p>}</div>{search&&<form className="admin-search" onSubmit={e=>{e.preventDefault();const data=new FormData(e.currentTarget);router.push('/admin/search?q='+encodeURIComponent(String(data.get('query'))));}}><Search/><input name="query" aria-label="Search orders, customers or designs" placeholder="Search orders, customers or designs..."/></form>}<div className="admin-account"><Link href="/admin/requests" className="icon-button notification" aria-label="View notifications"><Bell/><i/></Link><Link href="/admin/settings" className="avatar" aria-label="Admin profile">A</Link></div></header>}
+"use client";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  LayoutDashboard,
+  FilePenLine,
+  MessageCircle,
+  Box,
+  Users,
+  Tag,
+  ChartNoAxesColumnIncreasing,
+  Settings,
+  ExternalLink,
+  LogOut,
+  Menu,
+  Bell,
+  X,
+  Search,
+} from "lucide-react";
+import { demoAuth } from "@/services/auth";
+const items = [
+  { url: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { url: "/admin/designs", label: "Designs", icon: FilePenLine },
+  { url: "/admin/requests", label: "Custom Requests", icon: MessageCircle },
+  { url: "/admin/requests?tab=orders", label: "Orders", icon: Box },
+  { url: "/admin/customers", label: "Customers", icon: Users },
+  { url: "/admin/inventory", label: "Inventory", icon: Tag },
+  {
+    url: "/admin/analytics",
+    label: "Analytics",
+    icon: ChartNoAxesColumnIncreasing,
+  },
+  { url: "/admin/settings", label: "Settings", icon: Settings },
+];
+export function AdminShell({ children }: { children: React.ReactNode }) {
+  const path = usePathname();
+  const params = useSearchParams();
+  const router = useRouter();
+  const [ready, setReady] = useState(false);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!demoAuth.signedIn()) router.replace("/admin/login");
+    else setReady(true);
+  }, [router]);
+  function logout() {
+    demoAuth.signOut();
+    router.replace("/admin/login");
+  }
+  if (!ready)
+    return (
+      <main id="main" className="empty-state" role="status">
+        Opening your workspace…
+      </main>
+    );
+  return (
+    <div
+      className={`admin-shell ${path.includes("/designs/new") ? "create-shell" : ""} ${path.includes("/requests") ? "requests-shell" : ""}`}
+    >
+      <header className="admin-mobile-header">
+        <button
+          className="icon-button"
+          aria-label="Open admin menu"
+          aria-expanded={open}
+          onClick={() => setOpen(!open)}
+        >
+          {open ? <X /> : <Menu />}
+        </button>
+        <Link href="/admin">
+          <img src="/assets/brand/logo-navbar.webp" alt="I WILL BUY IT" />
+        </Link>
+        <Link
+          className="icon-button"
+          href="/admin/requests"
+          aria-label="View new requests"
+        >
+          <Bell />
+        </Link>
+        <Link
+          href="/admin/settings"
+          className="avatar"
+          aria-label="Admin profile"
+        >
+          A
+        </Link>
+      </header>
+      <aside className={`admin-sidebar ${open ? "open" : ""}`}>
+        <Link href="/admin" className="admin-brand">
+          <img src="/assets/brand/logo-navbar.webp" alt="I WILL BUY IT" />
+        </Link>
+        <nav aria-label="Admin navigation">
+          {items.map(({ url, label, icon: Icon }) => (
+            <Link
+              key={label}
+              href={url}
+              title={label}
+              className={
+                (
+                  url.includes("?")
+                    ? path === "/admin/requests" &&
+                      params.get("tab") === "orders"
+                    : url === "/admin/requests"
+                      ? path === url && params.get("tab") !== "orders"
+                      : url === "/admin"
+                        ? path === url
+                        : !url.includes("?") && path.startsWith(url)
+                )
+                  ? "selected"
+                  : ""
+              }
+              onClick={() => setOpen(false)}
+            >
+              <Icon />
+              <span>{label}</span>
+            </Link>
+          ))}
+        </nav>
+        <div className="sidebar-bottom">
+          <Link href="/">
+            <ExternalLink />
+            <span>View Website</span>
+          </Link>
+          <button onClick={logout}>
+            <LogOut />
+            <span>Log Out</span>
+          </button>
+        </div>
+      </aside>
+      {open && (
+        <button
+          className="sidebar-scrim"
+          aria-label="Close admin menu"
+          onClick={() => setOpen(false)}
+        />
+      )}
+      <main id="main" className="admin-content">
+        {children}
+      </main>
+    </div>
+  );
+}
+export function AdminHeading({
+  title,
+  subtitle,
+  search = true,
+}: {
+  title: string;
+  subtitle?: React.ReactNode;
+  search?: boolean;
+}) {
+  const router = useRouter();
+  return (
+    <header className="admin-heading">
+      <div>
+        <h1>{title}</h1>
+        {subtitle && <p>{subtitle}</p>}
+      </div>
+      {search && (
+        <form
+          className="admin-search"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const data = new FormData(e.currentTarget);
+            router.push(
+              "/admin/search?q=" +
+                encodeURIComponent(String(data.get("query"))),
+            );
+          }}
+        >
+          <Search />
+          <input
+            name="query"
+            aria-label="Search orders, customers or designs"
+            placeholder="Search orders, customers or designs..."
+          />
+        </form>
+      )}
+      <div className="admin-account">
+        <Link
+          href="/admin/requests"
+          className="icon-button notification"
+          aria-label="View notifications"
+        >
+          <Bell />
+          <i />
+        </Link>
+        <Link
+          href="/admin/settings"
+          className="avatar"
+          aria-label="Admin profile"
+        >
+          A
+        </Link>
+      </div>
+    </header>
+  );
+}

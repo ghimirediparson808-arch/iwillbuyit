@@ -1,5 +1,104 @@
-'use client';
-import {useRef,useState} from 'react';
-import {UploadCloud,X} from 'lucide-react';
-import {validateImage} from '@/services/uploads';
-export function UploadField({onFile,transparent=false,label='Upload reference image',preview}:{onFile:(file:File|null)=>void;transparent?:boolean;label?:string;preview?:string}){const input=useRef<HTMLInputElement>(null);const [error,setError]=useState('');const [drag,setDrag]=useState(false);const [name,setName]=useState('');async function accept(file?:File){if(!file)return;try{await validateImage(file,transparent);setError('');setName(file.name);onFile(file);}catch(e){setError((e as Error).message);}if(input.current)input.current.value='';}return <div><div className={`upload-zone ${drag?'dragging':''}`} onDragOver={e=>{e.preventDefault();setDrag(true);}} onDragLeave={()=>setDrag(false)} onDrop={e=>{e.preventDefault();setDrag(false);void accept(e.dataTransfer.files[0]);}}>{preview?<img className="upload-preview" src={preview} alt="Uploaded reference preview"/>:<UploadCloud/>}<div><strong>{name||label}</strong><p>{transparent?'Transparent PNG or WebP':'PNG, JPG or WEBP'} • up to 10 MB</p></div><input ref={input} className="visually-hidden" tabIndex={-1} type="file" accept={transparent?'image/png,image/webp':'image/png,image/jpeg,image/webp'} aria-label={label} onChange={e=>void accept(e.target.files?.[0])}/><button type="button" className="button secondary" onClick={()=>input.current?.click()}>{preview?'Replace file':'Choose file'}</button>{preview&&<button type="button" className="icon-button" aria-label="Remove uploaded image" onClick={()=>{onFile(null);setName('');}}><X/></button>}</div>{error&&<p className="error" role="alert">{error}</p>}</div>}
+"use client";
+import { useRef, useState } from "react";
+import { UploadCloud, X } from "lucide-react";
+import { validateImage } from "@/services/uploads";
+export function UploadField({
+  onFile,
+  transparent = false,
+  label = "Upload reference image",
+  preview,
+}: {
+  onFile: (file: File | null) => void;
+  transparent?: boolean;
+  label?: string;
+  preview?: string;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState("");
+  const [drag, setDrag] = useState(false);
+  const [name, setName] = useState("");
+  async function accept(file?: File) {
+    if (!file) return;
+    try {
+      await validateImage(file, transparent);
+      setError("");
+      setName(file.name);
+      onFile(file);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+    if (input.current) input.current.value = "";
+  }
+  return (
+    <div>
+      <div
+        className={`upload-zone ${drag ? "dragging" : ""}`}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
+        onDragLeave={() => setDrag(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          void accept(e.dataTransfer.files[0]);
+        }}
+      >
+        {preview ? (
+          <img
+            className="upload-preview"
+            src={preview}
+            alt="Uploaded reference preview"
+          />
+        ) : (
+          <UploadCloud />
+        )}
+        <div>
+          <strong>{name || label}</strong>
+          <p>
+            {transparent ? "Transparent PNG or WebP" : "PNG, JPG or WEBP"} • up
+            to 10 MB
+          </p>
+        </div>
+        <input
+          ref={input}
+          className="visually-hidden"
+          tabIndex={-1}
+          type="file"
+          accept={
+            transparent
+              ? "image/png,image/webp"
+              : "image/png,image/jpeg,image/webp"
+          }
+          aria-label={label}
+          onChange={(e) => void accept(e.target.files?.[0])}
+        />
+        <button
+          type="button"
+          className="button secondary"
+          onClick={() => input.current?.click()}
+        >
+          {preview ? "Replace file" : "Choose file"}
+        </button>
+        {preview && (
+          <button
+            type="button"
+            className="icon-button"
+            aria-label="Remove uploaded image"
+            onClick={() => {
+              onFile(null);
+              setName("");
+            }}
+          >
+            <X />
+          </button>
+        )}
+      </div>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
