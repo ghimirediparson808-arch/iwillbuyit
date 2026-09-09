@@ -1,3 +1,4 @@
+import "@/styles/landing.css";
 import Link from "next/link";
 import { HeroArtwork } from "@/components/site/HeroArtwork";
 import { Header } from "@/components/site/Header";

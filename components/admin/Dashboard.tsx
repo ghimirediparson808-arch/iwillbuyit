@@ -9,20 +9,22 @@ import {
   ArrowRight,
   ChevronRight,
 } from "lucide-react";
-import seed from "@/data/admin-seed.json";
+import { dashboardData, salesSeries } from "@/services/dashboard";
+import { useRequests } from "@/lib/hooks";
 import { repository } from "@/services/repository";
 import { AdminHeading } from "./AdminShell";
 export function SalesChart() {
   const [range, setRange] = useState(30);
-  const data =
-    range === 7
-      ? seed.sales.slice(-7)
-      : range === 90
-        ? [...seed.sales.map((n) => n * 0.6), ...seed.sales]
-        : seed.sales;
+  const requests = useRequests();
+  const series = salesSeries(requests, range);
+  const data = series.map((d) => d.value);
+  const maximum = Math.max(
+    1000,
+    Math.ceil((Math.max(...data) * 1.1) / 1000) * 1000,
+  );
   const points = data.map((n, i) => [
     50 + (i * 710) / (data.length - 1),
-    205 - (n / 25000) * 180,
+    205 - (n / maximum) * 180,
   ]);
   // Horizontal tangents preserve each observed value without overshooting peaks.
   const curve = points.reduce((path, point, i) => {
@@ -31,12 +33,10 @@ export function SalesChart() {
     const middle = (previous[0] + point[0]) / 2;
     return `${path} C${middle},${previous[1]} ${middle},${point[1]} ${point.join(",")}`;
   }, "");
-  const dates =
-    range === 7
-      ? ["2 Sep", "3 Sep", "4 Sep", "5 Sep", "6 Sep", "7 Sep", "8 Sep"]
-      : range === 90
-        ? ["11 Jun", "26 Jun", "11 Jul", "26 Jul", "10 Aug", "25 Aug", "8 Sep"]
-        : ["10 Aug", "15 Aug", "20 Aug", "25 Aug", "30 Aug", "4 Sep", "8 Sep"];
+  const dates = Array.from(
+    { length: 7 },
+    (_, i) => series[Math.round((i * (series.length - 1)) / 6)].label,
+  );
   return (
     <section className="admin-panel sales-panel">
       <div className="panel-heading">
@@ -58,7 +58,7 @@ export function SalesChart() {
         className="sales-chart"
         viewBox="0 0 790 250"
         role="img"
-        aria-label={`Sales overview for ${range} days, ending at Rs. 21,500`}
+        aria-label={`Sales overview for ${range} days, total Rs. ${data.reduce((a, b) => a + b, 0).toLocaleString()}`}
       >
         <defs>
           <linearGradient id="chart-fill" x1="0" y1="0" x2="0" y2="1">
@@ -82,7 +82,7 @@ export function SalesChart() {
               fill="#60799b"
               fontSize="13"
             >
-              {i ? i * 5 + "K" : "0"}
+              {i ? ((i * maximum) / 5000).toLocaleString() + "K" : "0"}
             </text>
           </g>
         ))}
@@ -108,7 +108,7 @@ export function SalesChart() {
           <circle
             key={i}
             cx={50 + (i * 710) / (data.length - 1)}
-            cy={205 - (n / 25000) * 180}
+            cy={205 - (n / maximum) * 180}
             r="4"
             fill="#062e59"
           />
@@ -141,110 +141,73 @@ export function Dashboard() {
     window.addEventListener("iwbi-data", update);
     return () => window.removeEventListener("iwbi-data", update);
   }, []);
-  const live = requests.filter((r) => !/^IWBI-R10[1-8]$/.test(r.id));
-  const orders = requests.filter(
-    (r) => r.orderStatus && !seed.recentOrders.some((o) => o.id === r.id),
-  );
-  const recentOrders = requests
-    .filter((r) => r.orderStatus)
+  const snapshot = dashboardData(requests);
+  const recentOrders = snapshot.orders
+    .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
     .slice(0, 4)
-    .map((r) => {
-      const original = seed.recentOrders.find((o) => o.id === r.id);
-      return {
-        id: r.id,
-        name: r.name,
-        design:
-          original?.design ||
-          repository.designs(true).find((d) => d.id === r.designId)?.name ||
-          "Custom design",
-        status: r.orderStatus!,
-        total: r.quote || 0,
-        updated:
-          original?.updated ||
-          new Date(r.activity.at(-1)?.at || r.createdAt).toLocaleString(
-            "en-GB",
-            {
-              day: "numeric",
-              month: "short",
-              hour: "2-digit",
-              minute: "2-digit",
-            },
-          ),
-      };
-    });
-  const statusGroup = (status: string) =>
-    status === "Paid"
-      ? "Confirmed"
-      : status === "Quality Check"
-        ? "Printing"
-        : status;
-  const statuses = seed.orderStatus.map((s) => ({
-    ...s,
-    count:
-      s.count +
-      requests.filter(
-        (r) => r.orderStatus && statusGroup(r.orderStatus) === s.name,
-      ).length -
-      seed.recentOrders.filter((o) => statusGroup(o.status) === s.name).length,
-  }));
-  const totalOrders = statuses.reduce((sum, s) => sum + s.count, 0);
+    .map((r) => ({
+      id: r.id,
+      name: r.name,
+      design:
+        repository.designs(true).find((d) => d.id === r.designId)?.name ||
+        r.description ||
+        "Custom design",
+      status: r.orderStatus!,
+      total: r.quote || 0,
+      updated: new Date(r.activity.at(-1)?.at || r.createdAt).toLocaleString(
+        "en-GB",
+        { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" },
+      ),
+    }));
+  const statuses = snapshot.statuses;
+  const totalOrders = snapshot.orders.length;
   let running = 0;
-  const donutFill = `conic-gradient(${statuses
-    .map((s) => {
-      const start = running;
-      running += (s.count / totalOrders) * 100;
-      return `${s.colour} ${start}% ${running}%`;
-    })
-    .join(",")})`;
+  const donutFill = totalOrders
+    ? `conic-gradient(${statuses
+        .map((s) => {
+          const start = running;
+          running += (s.count / totalOrders) * 100;
+          return `${s.colour} ${start}% ${running}%`;
+        })
+        .join(",")})`
+    : "var(--line)";
   const metrics = [
     {
       title: "New Requests",
-      value:
-        seed.metrics.requests +
-        live.filter((r) => r.status === "New Request").length,
+      value: snapshot.newRequests,
       caption: "Needs review",
       icon: FilePenLine,
     },
     {
       title: "Confirmed Orders",
-      value: seed.metrics.confirmed + orders.length,
-      caption: "This month",
+      value: snapshot.confirmed,
+      caption: "Stored orders",
       icon: Box,
     },
     {
       title: "In Production",
-      value:
-        seed.metrics.production +
-        orders.filter((r) => r.orderStatus === "Printing").length,
+      value: snapshot.production,
       caption: "Active now",
       icon: Settings,
     },
     {
       title: "Total Sales",
-      value:
-        "Rs. " +
-        (
-          seed.metrics.sales +
-          orders
-            .filter((r) =>
-              [
-                "Paid",
-                "Printing",
-                "Quality Check",
-                "Ready",
-                "Delivered",
-              ].includes(r.orderStatus || ""),
-            )
-            .reduce((s, r) => s + (r.quote || 0), 0)
-        ).toLocaleString(),
-      caption: "This month",
+      value: "Rs. " + snapshot.sales.toLocaleString(),
+      caption: "Paid order value",
       icon: ChartNoAxesColumnIncreasing,
     },
   ];
   return (
     <>
-      <AdminHeading title="Good morning, Admin" subtitle={seed.date} />
+      <AdminHeading
+        title="Good morning, Admin"
+        subtitle={new Date().toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        })}
+      />
       <div className="metrics-grid">
         {metrics.map(({ title, value, caption, icon: Icon }, i) => (
           <Link
@@ -315,6 +278,11 @@ export function Dashboard() {
                 </tr>
               </thead>
               <tbody>
+                {!recentOrders.length && (
+                  <tr>
+                    <td colSpan={6}>No orders yet.</td>
+                  </tr>
+                )}
                 {recentOrders.map((o) => (
                   <tr key={o.id}>
                     <td>

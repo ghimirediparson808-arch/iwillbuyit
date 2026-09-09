@@ -8,6 +8,7 @@ import { ColourControl, Quantity, Segmented } from "./Controls";
 import { Eyebrow } from "@/components/site/Decorations";
 import { Modal } from "@/components/Modal";
 import { newRequest, repository, whatsappUrl } from "@/services/repository";
+import { displayArtwork } from "@/services/artwork";
 import type { Colour, Side, View } from "@/types";
 export function DesignDetail({ slug }: { slug: string }) {
   const settings = useSettings();
@@ -22,11 +23,45 @@ export function DesignDetail({ slug }: { slug: string }) {
   const [expanded, setExpanded] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+  const display = design ? displayArtwork(design) : undefined;
   const art = useAsset(
-    design?.darkShirtAsset
-      .replace("/master/print-", "/web/detail-")
-      .replace(".png", ".webp"),
+    design?.artworkVariants
+      ? display?.source
+      : design?.darkShirtAsset
+          .replace("/master/print-", "/web/detail-")
+          .replace(".png", ".webp"),
   );
+  const [restored, setRestored] = useState("");
+  useEffect(() => {
+    if (!design?.id) return;
+    const value = repository.selections(design.id);
+    setColour(value.colour || "navy");
+    setSide(value.side || "front");
+    setView(value.view || "product");
+    setSize(value.size || "M");
+    setQuantity(Math.max(1, Math.min(99, value.quantity || 1)));
+    setRestored(design.id);
+  }, [design?.id]);
+  useEffect(() => {
+    if (!design || restored !== design.id) return;
+    if (
+      (design.colours?.length && !design.colours.includes(colour)) ||
+      (design.sides?.length && !design.sides.includes(side)) ||
+      (design.sizes?.length && !design.sizes.includes(size))
+    )
+      return;
+    try {
+      repository.saveSelection(design.id, {
+        colour,
+        side,
+        view,
+        size,
+        quantity,
+      });
+    } catch {
+      /* Selections stay usable when browser preferences cannot be saved. */
+    }
+  }, [design, restored, colour, side, view, size, quantity]);
   useEffect(() => {
     if (!design) return;
     if (design.colours?.length && !design.colours.includes(colour))
@@ -61,7 +96,15 @@ export function DesignDetail({ slug }: { slug: string }) {
             onClick={() => setExpanded(!expanded)}
             aria-expanded={expanded}
           >
-            <img src={art || design.thumbnail} alt="" />
+            <img
+              className={
+                design.artworkVariants
+                  ? "artwork-surface artwork-" + display?.tone
+                  : undefined
+              }
+              src={art || design.thumbnail}
+              alt=""
+            />
             <span>
               <Eyebrow>ORIGINAL ARTWORK</Eyebrow>
               <span>Design {design.id}</span>
@@ -70,7 +113,9 @@ export function DesignDetail({ slug }: { slug: string }) {
           </button>
           <div className="original-content">
             <Eyebrow>ORIGINAL ARTWORK</Eyebrow>
-            <div className="original-image">
+            <div
+              className={`original-image ${design.artworkVariants ? "artwork-surface artwork-" + display?.tone : ""}`}
+            >
               <img
                 src={art || design.thumbnail}
                 alt={`${design.name}, original artwork`}

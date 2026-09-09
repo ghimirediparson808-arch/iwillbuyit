@@ -10,3 +10,5 @@ qa/*.png
 
 .next-production/
 qa/*.log
+
+qa/*.jpg

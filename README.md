@@ -30,10 +30,10 @@ The admin sidebar also has working design library, customers, inventory, analyti
 
 ## Data and replaceable boundaries
 
-- `services/repository.ts`: launch records, design overrides, drafts, requests/orders, inventory and brand contact settings. Ordinary records use the `iwbi-v1-` localStorage prefix. Seeded dashboard statistics are a launch snapshot; newly created orders add to that baseline.
+- `services/repository.ts`: launch records, design overrides, drafts, requests/orders, inventory and brand contact settings. Ordinary records use the `iwbi-v1-` localStorage prefix. Dashboard totals, recent orders, status counts and sales series are calculated from repository request/order records; there is no aggregate baseline added to them. The repository supplies demo records when no local dataset exists. An explicitly stored empty dataset produces zero totals.
 - `services/uploads.ts`: IndexedDB `iwbi-uploads`, file decoding, size/dimension/type checks, and transparency validation. Files are kept locally and object URLs are revoked by the asset hook. Uploaded files do not leave this browser.
 - `services/auth.ts`: demonstrative local/session storage sign-in. A real backend must replace this with server-side authentication and authorization.
-- `components/design-preview/Mockup.tsx`: uses supplied normalized placement data for approved product/model mockups and preserves original image ratios. Cream uses light-shirt art; Navy/Black use dark-shirt art.
+- `components/design-preview/Mockup.tsx`: uses supplied normalized placement data for approved product/model mockups and preserves original image ratios. New uploads use explicit ink variants: dark ink on Cream, light ink on Navy/Black. Legacy `lightShirtAsset`/`darkShirtAsset` names describe garment colour and remain unchanged for the seven official records. Colour, side, view, size and quantity are restored per design after reload.
 - `components/site/HeroArtwork.tsx`: isolated responsive hero sources. Replace paths when the corrected transparent master/derivatives arrive, then rerun the landing comparisons.
 
 The public catalogue starts with the seven official launch records. Search, categories, sorting, colour, size, side, quantity, product/model view, request submission, uploads, draft/publish, review status, quote/proposal, order conversion, workflow status, inventory and contact settings are functional.
@@ -48,6 +48,7 @@ npm run typecheck
 npm run build
 npm test
 node qa/capture-pages.mjs
+node qa/landing-viewports.mjs
 python3 qa/compare.py
 ```
 
@@ -55,10 +56,18 @@ Browser tests require the app running on port 3000 and Playwright Chromium insta
 
 `qa/capture-pages.mjs` captures the exact 24 viewport dimensions recorded in `../REFERENCE_MAP.md`, checks images, overflow, console errors and HTTP failures. `qa/compare.py` writes QA-only side-by-side images with the reference on the left. These PNGs are ignored by Git and are never used as website backgrounds. `npm run format` formats application source.
 
+## Uploaded artwork variants
+
+`services/artwork.ts` resolves `artworkVariants.dark`, `.light`, `.original` and `.mode` from the saved design record. These are upload references resolved through IndexedDB; image bytes and alpha remain unchanged. Gallery/detail original panels use a separate Cream or Navy display surface for legibility. New uploads use normal blending with no inversion or recolouring.
+
+Paired mode requires compatible ink for each enabled garment: dark-only publishes Cream; light-only publishes Navy/Black. The admin sees a warning and can upload the missing variant. Unavailable colours are omitted from public detail controls. Explicit original multicolour mode preserves one unchanged original across every chosen garment; the operator should review contrast in the previews.
+
 ## Visual approval status
 
-**Landing approval is blocked by the supplied hero source.** The source's facial geometry and abruptly terminated right-edge hair differ from the reference. CSS sizing/positioning cannot reproduce those drawing details without altering the artwork. The user has explicitly deferred approval until a corrected transparent asset is supplied. No hero regeneration, distortion, redraw, or substitute art has been used.
+The user approved the existing website overall and requested the focused correction pass documented in `qa/VISUAL_QA.md`. Responsive geometry, admin navigation, upload variants, selection persistence and data-derived dashboard values have been corrected without changing the design system or supplied artwork.
 
-All eight page layouts have been captured and compared at supplied desktop/tablet/mobile dimensions. See `qa/VISUAL_QA.md` for remaining reference differences and verification details. Screenshot-only filler artwork, photographic backgrounds, certain decorative curves, and some sample data are not present in the approved pack; the frontend uses official supplied assets and actual stored data. A capture without overflow does not mean pixel-exact approval.
+The earlier hero source mismatch remains explicitly unresolved: the supplied portrait has different facial geometry and an abruptly terminated right-edge hair boundary. The complete supplied image is fitted proportionally, with no CSS clipping of important details. `HeroArtwork` remains replaceable for the corrected transparent asset. This pass does not claim pixel-exact landing approval or silently accept a different drawing.
+
+All eight page layouts were recaptured at the supplied desktop/tablet/mobile dimensions. Nine additional landing screenshots at 100% zoom and the paired-variant verification screenshots are in `qa/`. See the QA report for results, source constraints and the one-variant fallback.
 
 Root continuity documents: `../AGENTS.md`, `../PROJECT_STATUS.md`, `../REFERENCE_MAP.md`.

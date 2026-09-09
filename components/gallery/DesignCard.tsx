@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { Design } from "@/types";
+import { displayArtwork } from "@/services/artwork";
 import { useAsset } from "@/lib/hooks";
 export function DesignCard({
   design,
@@ -10,12 +11,13 @@ export function DesignCard({
   design: Design;
   href?: string;
 }) {
-  const src = useAsset(design.thumbnail);
+  const artwork = displayArtwork(design);
+  const src = useAsset(artwork.source);
   return (
     <article className="design-card">
       <Link
         href={href}
-        className="card-art"
+        className={`card-art ${design.artworkVariants ? "artwork-surface artwork-" + artwork.tone : ""}`}
         aria-label={`Inspect ${design.name}`}
       >
         {src ? (

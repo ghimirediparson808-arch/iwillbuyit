@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Eye,
   EyeOff,
@@ -18,6 +18,9 @@ export function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+  useEffect(() => {
+    if (demoAuth.signedIn()) router.replace("/admin");
+  }, [router]);
   return (
     <main id="main" className="login-page">
       <svg width="0" height="0" className="clip-defs" aria-hidden="true">

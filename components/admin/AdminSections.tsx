@@ -224,8 +224,9 @@ export function AdminSections({
           <section className="admin-panel analytics-note">
             <h2>Sales reporting</h2>
             <p>
-              The chart shows the seeded launch-period sales snapshot. Current
-              requests and order statuses are available in the orders workspace.
+              The chart is calculated from stored orders that have reached Paid
+              or a later production stage. Current requests and order statuses
+              are available in the orders workspace.
             </p>
             <Link
               className="button secondary"

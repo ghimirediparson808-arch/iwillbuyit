@@ -13,7 +13,9 @@ const specs = {
 const browser = await chromium.launch({ args: ["--no-sandbox"] });
 const context = await browser.newContext();
 await context.addInitScript(() => {
-  localStorage.setItem("iwbi-demo-session", "demo");
+  if (location.pathname === "/admin/login")
+    localStorage.removeItem("iwbi-demo-session");
+  else localStorage.setItem("iwbi-demo-session", "demo");
   localStorage.removeItem("iwbi-theme");
 });
 const page = await context.newPage();

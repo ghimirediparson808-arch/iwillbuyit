@@ -1,0 +1,473 @@
+{
+  "results": [
+    {
+      "width": 360,
+      "height": 800,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 360,
+        "height": 66,
+        "bottom": 66,
+        "right": 360
+      },
+      "copy": {
+        "x": 14.390625,
+        "y": 66,
+        "width": 331.21875,
+        "height": 319.015625,
+        "bottom": 385.015625,
+        "right": 345.609375
+      },
+      "art": {
+        "x": 14.390625,
+        "y": 397.015625,
+        "width": 331.21875,
+        "height": 402.984375,
+        "bottom": 800,
+        "right": 345.609375
+      },
+      "image": {
+        "x": 14.390625,
+        "y": 397.015625,
+        "width": 331.21875,
+        "height": 402.984375,
+        "bottom": 800,
+        "right": 345.609375
+      },
+      "actions": {
+        "x": 14.390625,
+        "y": 300.515625,
+        "width": 331.21875,
+        "height": 84.5,
+        "bottom": 385.015625,
+        "right": 345.609375
+      },
+      "artCropped": false,
+      "scrollHeight": 800,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 390,
+        "height": 66,
+        "bottom": 66,
+        "right": 390
+      },
+      "copy": {
+        "x": 15.59375,
+        "y": 66,
+        "width": 358.8125,
+        "height": 332.34375,
+        "bottom": 398.34375,
+        "right": 374.40625
+      },
+      "art": {
+        "x": 15.59375,
+        "y": 410.34375,
+        "width": 358.8125,
+        "height": 433.65625,
+        "bottom": 844,
+        "right": 374.40625
+      },
+      "image": {
+        "x": 15.59375,
+        "y": 410.34375,
+        "width": 358.8125,
+        "height": 433.65625,
+        "bottom": 844,
+        "right": 374.40625
+      },
+      "actions": {
+        "x": 15.59375,
+        "y": 313.09375,
+        "width": 358.8125,
+        "height": 85.25,
+        "bottom": 398.34375,
+        "right": 374.40625
+      },
+      "artCropped": false,
+      "scrollHeight": 844,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 115.1875,
+        "bottom": 115.1875,
+        "right": 768
+      },
+      "copy": {
+        "x": 30.71875,
+        "y": 115.1875,
+        "width": 706.5625,
+        "height": 485.6875,
+        "bottom": 600.875,
+        "right": 737.28125
+      },
+      "art": {
+        "x": 30.71875,
+        "y": 620.0625,
+        "width": 706.5625,
+        "height": 403.921875,
+        "bottom": 1023.984375,
+        "right": 737.28125
+      },
+      "image": {
+        "x": 30.71875,
+        "y": 620.0625,
+        "width": 706.5625,
+        "height": 403.921875,
+        "bottom": 1023.984375,
+        "right": 737.28125
+      },
+      "actions": {
+        "x": 30.71875,
+        "y": 470.078125,
+        "width": 706.5625,
+        "height": 130.796875,
+        "bottom": 600.875,
+        "right": 737.28125
+      },
+      "artCropped": false,
+      "scrollHeight": 1024,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 820,
+      "height": 1180,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 820,
+        "height": 123,
+        "bottom": 123,
+        "right": 820
+      },
+      "copy": {
+        "x": 32.796875,
+        "y": 123,
+        "width": 754.40625,
+        "height": 552.203125,
+        "bottom": 675.203125,
+        "right": 787.203125
+      },
+      "art": {
+        "x": 32.796875,
+        "y": 695.703125,
+        "width": 754.40625,
+        "height": 484.296875,
+        "bottom": 1180,
+        "right": 787.203125
+      },
+      "image": {
+        "x": 32.796875,
+        "y": 695.703125,
+        "width": 754.40625,
+        "height": 484.296875,
+        "bottom": 1180,
+        "right": 787.203125
+      },
+      "actions": {
+        "x": 32.796875,
+        "y": 526.078125,
+        "width": 754.40625,
+        "height": 149.125,
+        "bottom": 675.203125,
+        "right": 787.203125
+      },
+      "artCropped": false,
+      "scrollHeight": 1180,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 1024,
+        "height": 112,
+        "bottom": 112,
+        "right": 1024
+      },
+      "copy": {
+        "x": 73.71875,
+        "y": 229.75,
+        "width": 465.203125,
+        "height": 420.5,
+        "bottom": 650.25,
+        "right": 538.921875
+      },
+      "art": {
+        "x": 569.640625,
+        "y": 112,
+        "width": 380.640625,
+        "height": 656,
+        "bottom": 768,
+        "right": 950.28125
+      },
+      "image": {
+        "x": 569.640625,
+        "y": 118,
+        "width": 380.640625,
+        "height": 650,
+        "bottom": 768,
+        "right": 950.28125
+      },
+      "actions": {
+        "x": 73.71875,
+        "y": 554.265625,
+        "width": 465.203125,
+        "height": 57.59375,
+        "bottom": 611.859375,
+        "right": 538.921875
+      },
+      "artCropped": false,
+      "scrollHeight": 768,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 1280,
+      "height": 800,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 1280,
+        "height": 112,
+        "bottom": 112,
+        "right": 1280
+      },
+      "copy": {
+        "x": 92.15625,
+        "y": 214.03125,
+        "width": 581.5,
+        "height": 483.9375,
+        "bottom": 697.96875,
+        "right": 673.65625
+      },
+      "art": {
+        "x": 712.046875,
+        "y": 112,
+        "width": 475.796875,
+        "height": 688,
+        "bottom": 800,
+        "right": 1187.84375
+      },
+      "image": {
+        "x": 712.046875,
+        "y": 118,
+        "width": 475.796875,
+        "height": 682,
+        "bottom": 800,
+        "right": 1187.84375
+      },
+      "actions": {
+        "x": 92.15625,
+        "y": 597.96875,
+        "width": 581.5,
+        "height": 60,
+        "bottom": 657.96875,
+        "right": 673.65625
+      },
+      "artCropped": false,
+      "scrollHeight": 800,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 1366,
+      "height": 768,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 1366,
+        "height": 112,
+        "bottom": 112,
+        "right": 1366
+      },
+      "copy": {
+        "x": 98.34375,
+        "y": 190.609375,
+        "width": 620.578125,
+        "height": 498.765625,
+        "bottom": 689.375,
+        "right": 718.921875
+      },
+      "art": {
+        "x": 759.890625,
+        "y": 112,
+        "width": 507.75,
+        "height": 656,
+        "bottom": 768,
+        "right": 1267.640625
+      },
+      "image": {
+        "x": 759.890625,
+        "y": 118,
+        "width": 507.75,
+        "height": 650,
+        "bottom": 768,
+        "right": 1267.640625
+      },
+      "actions": {
+        "x": 98.34375,
+        "y": 593.390625,
+        "width": 620.578125,
+        "height": 57.59375,
+        "bottom": 650.984375,
+        "right": 718.921875
+      },
+      "artCropped": false,
+      "scrollHeight": 768,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 1440,
+      "height": 900,
+      "nav": {
+        "x": 0,
+        "y": 0,
+        "width": 1440,
+        "height": 112,
+        "bottom": 112,
+        "right": 1440
+      },
+      "copy": {
+        "x": 103.671875,
+        "y": 233.78125,
+        "width": 654.203125,
+        "height": 544.421875,
+        "bottom": 778.203125,
+        "right": 757.875
+      },
+      "art": {
+        "x": 801.0625,
+        "y": 112,
+        "width": 535.265625,
+        "height": 788,
+        "bottom": 900,
+        "right": 1336.328125
+      },
+      "image": {
+        "x": 801.0625,
+        "y": 118,
+        "width": 535.265625,
+        "height": 782,
+        "bottom": 900,
+        "right": 1336.328125
+      },
+      "actions": {
+        "x": 103.671875,
+        "y": 665.703125,
+        "width": 654.203125,
+        "height": 67.5,
+        "bottom": 733.203125,
+        "right": 757.875
+      },
+      "artCropped": false,
+      "scrollHeight": 900,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    },
+    {
+      "width": 1920,
+      "height": 1080,
+      "nav": {
+        "x": 124,
+        "y": 0,
+        "width": 1672,
+        "height": 124,
+        "bottom": 124,
+        "right": 1796
+      },
+      "copy": {
+        "x": 244,
+        "y": 276.40625,
+        "width": 757.890625,
+        "height": 651.1875,
+        "bottom": 927.59375,
+        "right": 1001.890625
+      },
+      "art": {
+        "x": 1055.890625,
+        "y": 124,
+        "width": 620.109375,
+        "height": 956,
+        "bottom": 1080,
+        "right": 1676
+      },
+      "image": {
+        "x": 1055.890625,
+        "y": 130,
+        "width": 620.109375,
+        "height": 950,
+        "bottom": 1080,
+        "right": 1676
+      },
+      "actions": {
+        "x": 244,
+        "y": 798.59375,
+        "width": 757.890625,
+        "height": 75,
+        "bottom": 873.59375,
+        "right": 1001.890625
+      },
+      "artCropped": false,
+      "scrollHeight": 1080,
+      "overflow": false,
+      "navCollision": false,
+      "textCollision": false,
+      "ctaInViewport": true,
+      "scale": 1,
+      "broken": 0
+    }
+  ],
+  "errors": []
+}

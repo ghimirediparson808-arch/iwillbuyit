@@ -1,6 +1,7 @@
 "use client";
 import placement from "@/data/mockup-layout.json";
 import type { Colour, Side, View, Design } from "@/types";
+import { printArtwork } from "@/services/artwork";
 import { useAsset } from "@/lib/hooks";
 export function Mockup({
   design,
@@ -14,13 +15,7 @@ export function Mockup({
   view?: View;
 }) {
   const rule = placement[view][side];
-  const art = useAsset(
-    design
-      ? colour === "cream"
-        ? design.lightShirtAsset
-        : design.darkShirtAsset
-      : undefined,
-  );
+  const art = useAsset(design ? printArtwork(design, colour) : undefined);
   return (
     <div className={`mockup mockup-${view}`}>
       <img
@@ -38,7 +33,10 @@ export function Mockup({
             top: `${rule.yPercent}%`,
             width: `${rule.widthPercent}%`,
             height: `${rule.heightPercent}%`,
-            mixBlendMode: colour === "cream" ? "multiply" : "normal",
+            mixBlendMode:
+              !design?.artworkVariants && colour === "cream"
+                ? "multiply"
+                : "normal",
           }}
         />
       )}

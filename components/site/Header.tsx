@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Menu, Search, Moon, Sun, X } from "lucide-react";
+import { Menu, Search, Moon, Sun, X, LockKeyhole } from "lucide-react";
 export function Header() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -53,6 +53,14 @@ export function Header() {
             {label}
           </Link>
         ))}
+        <Link
+          className="nav-admin-entry"
+          href="/admin/login"
+          onClick={() => setOpen(false)}
+        >
+          <LockKeyhole />
+          Admin Login
+        </Link>
         <button className="mobile-theme" onClick={theme}>
           {dark ? "Light theme" : "Dark theme"}
         </button>
@@ -84,6 +92,10 @@ export function Header() {
           {open ? <X /> : <Menu />}
         </button>
       </div>
+      <Link className="public-admin-entry" href="/admin/login">
+        <LockKeyhole />
+        Admin Login
+      </Link>
     </header>
   );
 }

@@ -12,6 +12,12 @@ export type Design = {
   lightShirtAsset: string;
   darkShirtAsset: string;
   thumbnail: string;
+  artworkVariants?: {
+    dark?: string;
+    light?: string;
+    original?: string;
+    mode: "paired" | "original";
+  };
   published?: boolean;
   available?: boolean;
   createdAt?: string;

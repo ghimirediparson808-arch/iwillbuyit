@@ -11,10 +11,10 @@ function read<T>(key: string, fallback: T): T {
     return fallback;
   }
 }
-function write(key: string, value: unknown) {
+function write(key: string, value: unknown, notify = true) {
   try {
     localStorage.setItem(prefix + key, JSON.stringify(value));
-    window.dispatchEvent(new Event("iwbi-data"));
+    if (notify) window.dispatchEvent(new Event("iwbi-data"));
   } catch {
     throw new Error(
       "Your browser storage is full or unavailable. Free some space and try again.",
@@ -80,6 +80,20 @@ export const repository = {
           : r,
       ),
     );
+  },
+  selections(id: string) {
+    return read<
+      Partial<{
+        colour: "navy" | "black" | "cream";
+        side: "front" | "back";
+        view: "product" | "model";
+        size: string;
+        quantity: number;
+      }>
+    >("selection-" + id, {});
+  },
+  saveSelection(id: string, value: unknown) {
+    write("selection-" + id, value, false);
   },
   settings() {
     return read("settings", {

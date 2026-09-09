@@ -63,3 +63,20 @@ export function useAsset(source?: string) {
   }, [source]);
   return url;
 }
+
+export function useRequests() {
+  const [requests, setRequests] = useState<import("@/types").RequestRecord[]>(
+    [],
+  );
+  useEffect(() => {
+    const update = () => setRequests(repository.requests());
+    update();
+    window.addEventListener("iwbi-data", update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener("iwbi-data", update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
+  return requests;
+}

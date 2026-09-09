@@ -135,8 +135,8 @@ test("uploaded custom request persists through reload, review and order conversi
   await expect(page.locator(".recent-orders")).toContainText(
     "Test Custom Customer",
   );
-  await expect(page.locator(".metric-1")).toContainText("25");
-  await expect(page.locator(".donut")).toContainText("129");
+  await expect(page.locator(".metric-1 strong")).toHaveText("4");
+  await expect(page.locator(".donut strong")).toHaveText("5");
 });
 test("admin guard, invalid sign in, real demo sign in and logout", async ({
   page,
@@ -172,10 +172,12 @@ test("transparent upload, draft, publish and public catalogue persistence", asyn
     .getByLabel("Full description")
     .fill("An approved transparent coffee illustration.");
   await page
-    .getByLabel("Light-shirt artwork", { exact: true })
+    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
     .setInputFiles(art);
   await page.getByRole("button", { name: "Save Draft", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Draft saved");
+  await expect(page.locator(".success[role=status]")).toContainText(
+    "Draft saved",
+  );
   await page.goto("/designs");
   await page
     .getByRole("textbox", { name: "Search designs", exact: true })
@@ -276,16 +278,18 @@ test("invalid uploads, draft preview, restricted garments and keyboard dialog", 
 }) => {
   await login(page);
   await page.goto("/admin/designs/new");
-  await page.getByLabel("Light-shirt artwork", { exact: true }).setInputFiles({
-    name: "invalid.png",
-    mimeType: "image/png",
-    buffer: Buffer.from("not an image"),
-  });
+  await page
+    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
+    .setInputFiles({
+      name: "invalid.png",
+      mimeType: "image/png",
+      buffer: Buffer.from("not an image"),
+    });
   await expect(page.locator(".original-upload .error")).toContainText(
     "not a valid image",
   );
   await page
-    .getByLabel("Light-shirt artwork", { exact: true })
+    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
     .setInputFiles(art);
   await page
     .getByLabel("Design name", { exact: true })
@@ -293,7 +297,9 @@ test("invalid uploads, draft preview, restricted garments and keyboard dialog", 
   await page.getByLabel("Navy", { exact: true }).uncheck();
   await page.getByLabel("Black", { exact: true }).uncheck();
   await page.getByRole("button", { name: "Save Draft", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Draft saved");
+  await expect(page.locator(".success[role=status]")).toContainText(
+    "Draft saved",
+  );
   await page.goto("/admin/designs");
   const draft = page
     .locator(".admin-library>section")

@@ -7,6 +7,7 @@ import { UploadField } from "@/components/UploadField";
 import { Mockup } from "@/components/design-preview/Mockup";
 import { Segmented } from "@/components/design-preview/Controls";
 import { repository, launchDesigns } from "@/services/repository";
+import { displayArtwork } from "@/services/artwork";
 import { saveUpload } from "@/services/uploads";
 import { useAsset } from "@/lib/hooks";
 import type { Design, Colour, Side } from "@/types";
@@ -23,12 +24,15 @@ export function CreateDesign() {
   const [sides, setSides] = useState<Side[]>(["front"]);
   const [sizes, setSizes] = useState(["S", "M", "L", "XL", "XXL"]);
   const [light, setLight] = useState<File | null>(null);
+  const [originalMode, setOriginalMode] = useState(false);
   const [dark, setDark] = useState<File | null>(null);
   const [lightUrl, setLightUrl] = useState("");
   const [darkUrl, setDarkUrl] = useState("");
   const [useSample, setUseSample] = useState(true);
   const [previewMode, setPreviewMode] = useState("card");
   const [colour, setColour] = useState<Colour>("navy");
+  const [lightChecking, setLightChecking] = useState(false);
+  const [darkChecking, setDarkChecking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [saved, setSaved] = useState<Design | null>(null);
@@ -51,6 +55,14 @@ export function CreateDesign() {
     setDarkUrl(url);
     return () => URL.revokeObjectURL(url);
   }, [dark]);
+  const effectiveColours =
+    useSample || originalMode || (light && dark)
+      ? colours
+      : colours.filter((c) => (c === "cream" ? !!light : !!dark));
+  useEffect(() => {
+    if (effectiveColours.length && !effectiveColours.includes(colour))
+      setColour(effectiveColours[0]);
+  }, [effectiveColours, colour]);
   const preview: Design = {
     ...sample,
     id: "Assigned on save",
@@ -62,18 +74,34 @@ export function CreateDesign() {
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean),
-    lightShirtAsset: lightUrl || (useSample ? sample.lightShirtAsset : ""),
+    artworkVariants: useSample
+      ? undefined
+      : {
+          dark: lightUrl,
+          light: darkUrl,
+          original: lightUrl || darkUrl,
+          mode: originalMode ? "original" : "paired",
+        },
+    lightShirtAsset:
+      lightUrl || darkUrl || (useSample ? sample.lightShirtAsset : ""),
     darkShirtAsset:
       darkUrl || lightUrl || (useSample ? sample.darkShirtAsset : ""),
-    thumbnail: lightUrl || (useSample ? sample.thumbnail : ""),
+    thumbnail: lightUrl || darkUrl || (useSample ? sample.thumbnail : ""),
     available,
-    colours,
+    colours: effectiveColours,
     sides,
     sizes,
     featured,
   };
   const thumbnail = useAsset(preview.thumbnail);
-  const original = useAsset(preview.lightShirtAsset);
+  const display = displayArtwork(preview);
+  const original = useAsset(
+    useSample ? sample.lightShirtAsset : display.source,
+  );
+  const variantWarning =
+    !useSample && !originalMode && (!light || !dark)
+      ? "One ink variant is missing. The original stays transparent and unchanged; only shirts with compatible ink contrast will be published. Upload both variants for all colours, or choose original multicolour artwork when appropriate."
+      : "";
   async function save(published: boolean) {
     setError("");
     if (!name.trim()) {
@@ -84,12 +112,14 @@ export function CreateDesign() {
       setError("Add a description for your design.");
       return;
     }
-    if (!light && !useSample) {
+    if (!light && !dark && !useSample) {
       setError("Upload transparent artwork first.");
       return;
     }
-    if (!colours.length || !sides.length || !sizes.length) {
-      setError("Choose at least one colour, print side and size.");
+    if (!effectiveColours.length || !sides.length || !sizes.length) {
+      setError(
+        "Choose at least one compatible shirt colour, print side and size.",
+      );
       return;
     }
     setBusy(true);
@@ -109,13 +139,33 @@ export function CreateDesign() {
         slug,
         name: name.trim(),
         description: description.trim(),
-        lightShirtAsset: lightId ? "upload:" + lightId : sample.lightShirtAsset,
+        artworkVariants: useSample
+          ? undefined
+          : {
+              dark: lightId ? "upload:" + lightId : undefined,
+              light: darkId ? "upload:" + darkId : undefined,
+              original: lightId
+                ? "upload:" + lightId
+                : darkId
+                  ? "upload:" + darkId
+                  : undefined,
+              mode: originalMode ? "original" : "paired",
+            },
+        lightShirtAsset: lightId
+          ? "upload:" + lightId
+          : darkId
+            ? "upload:" + darkId
+            : sample.lightShirtAsset,
         darkShirtAsset: darkId
           ? "upload:" + darkId
           : lightId
             ? "upload:" + lightId
             : sample.darkShirtAsset,
-        thumbnail: lightId ? "upload:" + lightId : sample.thumbnail,
+        thumbnail: lightId
+          ? "upload:" + lightId
+          : darkId
+            ? "upload:" + darkId
+            : sample.thumbnail,
         createdAt: new Date().toISOString(),
         published,
       };
@@ -154,7 +204,9 @@ export function CreateDesign() {
       <div className="create-grid">
         <section className="admin-panel original-upload" id="artwork">
           <h2>Original artwork</h2>
-          <div className="create-original-image">
+          <div
+            className={`create-original-image ${!useSample ? "artwork-surface artwork-" + display.tone : ""}`}
+          >
             {original ? (
               <img src={original} alt="Original artwork preview" />
             ) : (
@@ -167,7 +219,8 @@ export function CreateDesign() {
           <div className="art-upload-controls">
             <UploadField
               transparent
-              label="Light-shirt artwork"
+              label="Dark artwork (Cream shirts)"
+              onValidating={setLightChecking}
               preview={lightUrl}
               onFile={(file) => {
                 setLight(file);
@@ -188,7 +241,9 @@ export function CreateDesign() {
             <p>PNG / WebP • High resolution</p>
             <p className="ready-line">
               <CheckCircle2 />
-              {light || useSample ? "Background ready" : "Awaiting artwork"}
+              {light || dark || useSample
+                ? "Background ready"
+                : "Awaiting artwork"}
             </p>
             <div className="original-file-note">
               <Info />
@@ -196,18 +251,32 @@ export function CreateDesign() {
             </div>
           </div>
           <details className="dark-art-upload">
-            <summary>Dark-shirt artwork</summary>
+            <summary>Light artwork (Navy/Black shirts)</summary>
             <p>
-              Upload a separate light-ink version for Navy and Black. Otherwise
-              the original artwork is used.
+              Transparent light ink for Navy and Black. The dark-ink file above
+              is used for Cream.
             </p>
             <UploadField
               transparent
-              label="Dark-shirt artwork"
+              label="Light artwork (Navy/Black shirts)"
+              onValidating={setDarkChecking}
               preview={darkUrl}
-              onFile={setDark}
+              onFile={(file) => {
+                setDark(file);
+                if (file) setUseSample(false);
+              }}
             />
           </details>
+          {!useSample && (
+            <label className="check-label original-mode">
+              <input
+                type="checkbox"
+                checked={originalMode}
+                onChange={(e) => setOriginalMode(e.target.checked)}
+              />
+              Use original multicolour artwork for every shirt
+            </label>
+          )}
           {useSample && (
             <p className="sample-note">
               Approved sample artwork. Replace it to create your own design.
@@ -365,7 +434,15 @@ export function CreateDesign() {
             {previewMode === "card" ? (
               <>
                 {thumbnail && (
-                  <img src={original || thumbnail} alt="Gallery card artwork" />
+                  <img
+                    className={
+                      !useSample
+                        ? "artwork-surface artwork-" + display.tone
+                        : undefined
+                    }
+                    src={original || thumbnail}
+                    alt="Gallery card artwork"
+                  />
                 )}
                 <div>
                   <h3>{preview.name}</h3>
@@ -400,17 +477,21 @@ export function CreateDesign() {
                   setColour(c);
                   setPreviewMode("detail");
                 }}
+                disabled={!effectiveColours.includes(c)}
                 aria-label={`Preview ${c} shirt`}
               >
                 <Mockup design={preview} colour={c} />
-                <span>{c[0].toUpperCase() + c.slice(1)}</span>
+                <span>
+                  {c[0].toUpperCase() + c.slice(1)}
+                  {!effectiveColours.includes(c) && " · needs ink variant"}
+                </span>
               </button>
             ))}
           </div>
           <div className="checks-ready">
             <p>
               <CheckCircle2 />
-              Artwork {light || useSample ? "checked" : "needed"}
+              Artwork {light || dark || useSample ? "checked" : "needed"}
             </p>
             <p>
               <CheckCircle2 />
@@ -421,6 +502,11 @@ export function CreateDesign() {
               Mockups ready
             </p>
           </div>
+          {variantWarning && (
+            <p className="variant-warning" role="status">
+              {variantWarning}
+            </p>
+          )}
           {error && (
             <p className="error" role="alert">
               {error}
@@ -443,14 +529,14 @@ export function CreateDesign() {
             <button
               className="button secondary"
               onClick={() => void save(false)}
-              disabled={busy}
+              disabled={busy || lightChecking || darkChecking}
             >
               Save Draft
             </button>
             <button
               className="button"
               onClick={() => void save(true)}
-              disabled={busy}
+              disabled={busy || lightChecking || darkChecking}
             >
               {busy ? "Saving…" : "Publish Design"}
             </button>

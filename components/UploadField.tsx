@@ -7,11 +7,13 @@ export function UploadField({
   transparent = false,
   label = "Upload reference image",
   preview,
+  onValidating,
 }: {
   onFile: (file: File | null) => void;
   transparent?: boolean;
   label?: string;
   preview?: string;
+  onValidating?: (pending: boolean) => void;
 }) {
   const input = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
@@ -19,6 +21,7 @@ export function UploadField({
   const [name, setName] = useState("");
   async function accept(file?: File) {
     if (!file) return;
+    onValidating?.(true);
     try {
       await validateImage(file, transparent);
       setError("");
@@ -27,6 +30,7 @@ export function UploadField({
     } catch (e) {
       setError((e as Error).message);
     }
+    onValidating?.(false);
     if (input.current) input.current.value = "";
   }
   return (

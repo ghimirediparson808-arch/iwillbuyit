@@ -5515,3 +5515,72 @@ tr:last-child td {
     height: 110px;
   }
 }
+/* Quiet public/admin entry points; the primary navigation keeps its spacing. */
+.public-admin-entry {
+  position: absolute;
+  right: 4%;
+  top: 78px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 4px 8px;
+  min-height: 28px;
+}
+.public-admin-entry svg {
+  width: 13px;
+  height: 13px;
+}
+.nav-links .nav-admin-entry {
+  display: none;
+}
+@media (max-width: 900px) {
+  .public-admin-entry {
+    display: none;
+  }
+  .nav-links.expanded .nav-admin-entry {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .nav-admin-entry svg {
+    width: 18px;
+    height: 18px;
+  }
+}
+/* Transparent uploaded ink is displayed against a readable, separate UI surface. */
+.artwork-surface.artwork-navy {
+  background: #062e59;
+}
+.artwork-surface.artwork-cream {
+  background: #faf7f0;
+}
+.original-mode {
+  font-size: 12px;
+  margin-top: 12px;
+  grid-column: 1/-1;
+}
+.original-mode input {
+  flex-shrink: 0;
+}
+.variant-warning {
+  padding: 12px;
+  border: 1px solid #d6bd85;
+  border-radius: 10px;
+  background: #fbf1df;
+  color: #062e59;
+  font-size: 13px;
+  margin-block: 12px;
+}
+.original-upload:has(.original-mode) .dark-art-upload {
+  position: static;
+  width: 100%;
+  margin-top: 12px;
+  grid-column: 1/-1;
+}
+.recent-orders td:nth-child(3) {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
