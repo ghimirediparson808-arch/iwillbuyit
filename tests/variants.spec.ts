@@ -16,6 +16,7 @@ test("A: Cream only retains one card and visibly disables Navy/Black", async ({
   await startDesign(page, "Scenario A Cream");
   await addVariant(page, "Cream", darkFile);
   await page.getByLabel("Default display colour: Cream").check();
+  await page.getByLabel("Gallery Cover source").selectOption("cream");
   const d = await publish(page);
   await page.goto("/designs");
   await expect(page.locator(".design-card")).toHaveCount(8);
@@ -23,8 +24,11 @@ test("A: Cream only retains one card and visibly disables Navy/Black", async ({
     .locator(".design-card")
     .filter({ hasText: "Scenario A Cream" });
   await expect(card.locator(".card-art")).toHaveCSS(
-    "background-color",
-    "rgb(250, 247, 240)",
+    "background-image",
+    await page
+      .locator(".card-art")
+      .first()
+      .evaluate((el) => getComputedStyle(el).backgroundImage),
   );
   await card.getByLabel("Inspect Scenario A Cream", { exact: true }).click();
   await expect(
@@ -106,7 +110,7 @@ test("B: one record switches paired front/back files, backgrounds, product/model
         );
       }
   const url = await page
-    .getByRole("link", { name: "Ask on WhatsApp" })
+    .getByRole("link", { name: "Order on WhatsApp" })
     .getAttribute("href");
   expect(decodeURIComponent(url!)).toContain(`${d.id}/cream/back`);
   await page.getByRole("button", { name: "Request This Design" }).click();
@@ -116,7 +120,7 @@ test("B: one record switches paired front/back files, backgrounds, product/model
     .getByRole("button", { name: "Submit request", exact: true })
     .click();
   const request = await page.evaluate(
-    () => JSON.parse(localStorage.getItem("iwbi-v1-requests")!)[0],
+    () => JSON.parse(localStorage.getItem("iwbi-v1-commerce")!).requests[0],
   );
   expect(request.variantId).toBe(`${d.id}/cream/back`);
   expect(request.variantArtwork).toBe(d.variants.cream.back);
@@ -191,7 +195,7 @@ test("E: draft editing restores files, backgrounds and default; disabled default
   await page
     .locator(".admin-library > section")
     .filter({ hasText: "Scenario E Draft" })
-    .getByRole("link", { name: "Edit design" })
+    .getByRole("link", { name: "Edit Design" })
     .click();
   await expect(page.getByLabel("Navy preview background")).toHaveValue("black");
   await page.getByLabel("Enable Navy").uncheck();
@@ -202,6 +206,7 @@ test("E: draft editing restores files, backgrounds and default; disabled default
     "Select an enabled default",
   );
   await page.getByLabel("Default display colour: Cream").check();
+  await page.getByLabel("Gallery Cover source").selectOption("cream");
   const d = await publish(page);
   expect(await fileCount(page)).toBe(2);
   await page.goto("/designs/" + d.slug);
@@ -278,7 +283,7 @@ test("legacy migration preserves seven identities and stored drafts without dupl
   await page
     .locator(".admin-library > section")
     .filter({ hasText: "Legacy draft" })
-    .getByRole("link", { name: "Edit design" })
+    .getByRole("link", { name: "Edit Design" })
     .click();
   await expect(page.getByLabel("Design code")).toHaveValue("LEGACY-1");
   await expect(page.getByLabel("Enable Navy")).not.toBeChecked();

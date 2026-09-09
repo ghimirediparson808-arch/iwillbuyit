@@ -8,7 +8,13 @@ export function emptyVariants(): Record<Colour, ColourVariant> {
 }
 /** Adapt old records without changing identity, order, files or previous garment assignments. */
 export function migrateDesign(design: Design): Design {
-  if (design.variants) return design;
+  if (design.variants)
+    return design.galleryCover || !design.defaultColour
+      ? design
+      : {
+          ...design,
+          galleryCover: { kind: "variant", colour: design.defaultColour },
+        };
   const variants = emptyVariants();
   for (const c of shirtColours) {
     const old = design.artworkVariants;
@@ -38,6 +44,10 @@ export function migrateDesign(design: Design): Design {
     variants,
     colours: enabled,
     defaultColour: enabled.includes("navy") ? "navy" : enabled[0],
+    galleryCover: design.galleryCover || {
+      kind: "variant",
+      colour: enabled.includes("navy") ? "navy" : enabled[0] || "navy",
+    },
     sides: design.sides || ["front", "back"],
     sizes: design.sizes || ["S", "M", "L", "XL", "XXL"],
   };
@@ -82,6 +92,10 @@ export function variantIdentity(design: Design, colour: Colour, side: Side) {
 }
 export function publicationErrors(design: Design) {
   const errors: string[] = [];
+  if (design.galleryCover && !galleryArtwork(design))
+    errors.push(
+      "Choose an enabled Gallery Cover variant with artwork, or upload a transparent cover.",
+    );
   if (!design.name.trim()) errors.push("Enter a design name.");
   if (!design.description.trim()) errors.push("Add a full description.");
   const enabled = shirtColours.filter((c) => design.variants?.[c]?.enabled);
@@ -106,4 +120,15 @@ export function publicationErrors(design: Design) {
   if (!design.sizes?.length) errors.push("Choose at least one size.");
   if (!design.sides?.length) errors.push("Choose at least one print side.");
   return errors;
+}
+
+// The gallery canvas is global; this source is an explicit editorial choice.
+export function galleryArtwork(design: Design): string {
+  const cover = design.galleryCover;
+  if (cover?.kind === "upload") return cover.source;
+  return printArtwork(
+    design,
+    cover?.kind === "variant" ? cover.colour : design.defaultColour || "navy",
+    "front",
+  );
 }

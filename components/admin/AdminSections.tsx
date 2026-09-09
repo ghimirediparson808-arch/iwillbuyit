@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Plus, ExternalLink } from "lucide-react";
+import { Plus, ExternalLink, Trash2 } from "lucide-react";
 import { AdminHeading } from "./AdminShell";
 import { SalesChart } from "./Dashboard";
 import { repository } from "@/services/repository";
-import { useDesigns } from "@/lib/hooks";
+import { useDesigns, useOrders } from "@/lib/hooks";
 import { DesignCard } from "@/components/gallery/DesignCard";
 import { demoAuth } from "@/services/auth";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ export function AdminSections({
 }) {
   const router = useRouter();
   const designs = useDesigns(true);
+  const orders = useOrders();
   const [query, setQuery] = useState(initialQuery);
   const [previewOpen, setPreviewOpen] = useState(!!previewId);
   const previewDesign = designs.find((d) => d.id === previewId);
@@ -29,6 +30,7 @@ export function AdminSections({
   const [settings, setSettings] = useState(repository.settings());
   const [stock, setStock] = useState(repository.stock());
   const [notice, setNotice] = useState("");
+  const [undo, setUndo] = useState<string | null>(null);
   useEffect(() => {
     setRequests(repository.requests());
     setSettings(repository.settings());
@@ -119,20 +121,45 @@ export function AdminSections({
                       className="button secondary"
                       href={`/admin/designs/new?edit=${encodeURIComponent(d.id)}`}
                     >
-                      Edit design
+                      Edit Design
                     </Link>
                     <span className="badge">
-                      {d.published ? "Published" : "Draft"}
+                      {d.available === false
+                        ? "Unavailable"
+                        : d.published
+                          ? "Published"
+                          : "Draft"}
                     </span>
                     <button
                       className="button secondary"
                       onClick={() =>
-                        repository.updateDesign(d.id, {
-                          available: !d.available,
-                        })
+                        d.available
+                          ? repository.markDesignUnavailable(d.id)
+                          : repository.makeDesignAvailable(d.id)
                       }
                     >
-                      {d.available ? "Mark unavailable" : "Mark available"}
+                      {d.available ? "Mark Unavailable" : "Make Available"}
+                    </button>
+                    <button
+                      className="button secondary danger"
+                      onClick={() => {
+                        try {
+                          repository.removeDesign(d.id);
+                          setUndo(d.id);
+                          setNotice("Design removed");
+                          setTimeout(() => {
+                            repository.finalizeDesignRemovals();
+                            setUndo((current) =>
+                              current === d.id ? null : current,
+                            );
+                          }, 10100);
+                        } catch (e) {
+                          setNotice((e as Error).message);
+                        }
+                      }}
+                    >
+                      <Trash2 />
+                      Remove Design
                     </button>
                     {!d.published && (
                       <button
@@ -162,27 +189,38 @@ export function AdminSections({
                 <tr>
                   <th>Customer</th>
                   <th>Contact</th>
-                  <th>Latest request</th>
+                  <th>Request / order</th>
                   <th>Status</th>
                 </tr>
               </thead>
               <tbody>
+                {!requests.length && !orders.length && (
+                  <tr>
+                    <td colSpan={4}>No customers yet.</td>
+                  </tr>
+                )}
+                {orders
+                  .filter((o) => !o.requestId)
+                  .map((o) => (
+                    <tr key={o.id}>
+                      <td>{o.name}</td>
+                      <td>{o.phone}</td>
+                      <td>
+                        <Link href={`/admin/requests?tab=orders&order=${o.id}`}>
+                          {o.id}
+                        </Link>
+                      </td>
+                      <td>{o.productionStatus}</td>
+                    </tr>
+                  ))}
                 {requests.map((r) => (
                   <tr key={r.id}>
                     <td>{r.name}</td>
                     <td>{r.phone || "Not supplied"}</td>
                     <td>
-                      <Link
-                        href={
-                          "/admin/requests?order=" +
-                          r.id +
-                          (r.orderStatus ? "&tab=orders" : "")
-                        }
-                      >
-                        {r.id}
-                      </Link>
+                      <Link href={"/admin/requests?order=" + r.id}>{r.id}</Link>
                     </td>
-                    <td>{r.orderStatus || r.status}</td>
+                    <td>{r.status}</td>
                   </tr>
                 ))}
               </tbody>
@@ -193,15 +231,56 @@ export function AdminSections({
       {section === "inventory" && (
         <section className="admin-panel inventory-panel">
           <h2>T-shirt stock</h2>
+          <button
+            className="button secondary"
+            onClick={() =>
+              setStock([...stock, { colour: "navy", size: "M", count: 0 }])
+            }
+          >
+            Add stock entry
+          </button>
           {stock.map((s, i) => (
-            <div className="stock-row" key={s.colour}>
+            <div className="stock-row" key={i}>
               <img
                 src={`/assets/mockups/product/front/${s.colour}.webp`}
                 alt={`${s.colour} shirt`}
               />
-              <strong>
-                {s.colour} · {s.size}
-              </strong>
+              <label className="field">
+                Colour
+                <select
+                  aria-label={`Stock colour ${i + 1}`}
+                  value={s.colour}
+                  onChange={(e) =>
+                    setStock(
+                      stock.map((v, j) =>
+                        j === i ? { ...v, colour: e.target.value } : v,
+                      ),
+                    )
+                  }
+                >
+                  {["navy", "black", "cream"].map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                Size
+                <select
+                  aria-label={`Stock size ${i + 1}`}
+                  value={s.size}
+                  onChange={(e) =>
+                    setStock(
+                      stock.map((v, j) =>
+                        j === i ? { ...v, size: e.target.value } : v,
+                      ),
+                    )
+                  }
+                >
+                  {["S", "M", "L", "XL", "XXL"].map((c) => (
+                    <option key={c}>{c}</option>
+                  ))}
+                </select>
+              </label>
               <label className="field">
                 Available stock
                 <input
@@ -239,9 +318,9 @@ export function AdminSections({
           <section className="admin-panel analytics-note">
             <h2>Sales reporting</h2>
             <p>
-              The chart is calculated from stored orders that have reached Paid
-              or a later production stage. Current requests and order statuses
-              are available in the orders workspace.
+              Sales include orders whose payment status is Paid, including
+              archived orders. Unpaid and refunded orders are excluded.
+              Production changes do not change paid sales.
             </p>
             <Link
               className="button secondary"
@@ -343,6 +422,25 @@ export function AdminSections({
                 <span>{d.id}</span>
               </Link>
             ))}
+          <h2 className="search-results-title">Orders</h2>
+          {orders
+            .filter((o) =>
+              (o.name + " " + o.id + " " + o.snapshot.name)
+                .toLowerCase()
+                .includes(query.toLowerCase()),
+            )
+            .map((o) => (
+              <Link
+                className="search-result"
+                key={o.id}
+                href={`/admin/requests?tab=orders&order=${o.id}`}
+              >
+                {o.name}
+                <span>
+                  {o.id} · {o.productionStatus}
+                </span>
+              </Link>
+            ))}
           <h2 className="search-results-title">Requests & customers</h2>
           {requests
             .filter((r) =>
@@ -353,11 +451,7 @@ export function AdminSections({
             .map((r) => (
               <Link
                 className="search-result"
-                href={
-                  "/admin/requests?order=" +
-                  r.id +
-                  (r.orderStatus ? "&tab=orders" : "")
-                }
+                href={"/admin/requests?order=" + r.id}
                 key={r.id}
               >
                 {r.name}
@@ -369,6 +463,21 @@ export function AdminSections({
       {notice && (
         <p className="toast" role="status">
           {notice}
+          {undo && (
+            <button
+              onClick={() => {
+                try {
+                  repository.undoRemoveDesign(undo);
+                  setUndo(null);
+                  setNotice("Design restored");
+                } catch (e) {
+                  setNotice((e as Error).message);
+                }
+              }}
+            >
+              Undo
+            </button>
+          )}
           <button
             aria-label="Dismiss notification"
             onClick={() => setNotice("")}

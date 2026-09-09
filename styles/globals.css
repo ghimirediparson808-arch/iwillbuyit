@@ -5606,3 +5606,112 @@ tr:last-child td {
 .artwork-surface.artwork-black {
   background: #111111;
 }
+
+/* Shared catalogue canvas: editorial background never modifies print pixels. */
+.design-card .card-art.gallery-canvas {
+  background: radial-gradient(ellipse at 50% 42%, #b4b9b8 0%, #98a2a8 75%);
+  height: 260px;
+  aspect-ratio: auto;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.design-card .gallery-canvas img {
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 1px rgba(6, 46, 89, 0.2));
+  mix-blend-mode: normal;
+}
+.design-card .card-info {
+  min-height: 100px;
+  align-items: center;
+  gap: 12px;
+}
+.design-card .card-info > div {
+  min-width: 0;
+}
+.design-card .card-info h2 {
+  font-size: 18px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.design-card .inspect-link {
+  flex-shrink: 0;
+}
+.library-actions {
+  flex-wrap: wrap;
+}
+.library-actions .button {
+  font-size: 12px;
+}
+.button.danger {
+  color: #a52731;
+  background: #fff5f4;
+  border: 1px solid #e7b8bc;
+}
+.button.danger:hover {
+  background: #fbe4e4;
+}
+.toast button {
+  min-width: 44px;
+  min-height: 44px;
+}
+@media (max-width: 700px) {
+  .design-card .card-art.gallery-canvas {
+    height: 230px;
+    padding: 22px;
+  }
+  .design-card .card-info h2 {
+    font-size: 17px;
+  }
+  .design-card .card-info {
+    min-height: 100px;
+  }
+}
+/* Reserve a uniform footer for two-line names and aligned inspect actions. */
+.design-card .card-info {
+  height: 112px;
+  min-height: 112px;
+  padding: 16px 19px;
+}
+@media (min-width: 701px) and (max-width: 900px) {
+  .design-card .card-info {
+    height: 128px;
+    min-height: 128px;
+  }
+}
+@media (max-width: 600px) {
+  .design-card .card-info {
+    height: 140px;
+    min-height: 140px;
+    padding: 14px;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: 4px;
+  }
+  .design-card .card-info h2 {
+    font-size: 16px;
+  }
+  .design-card .inspect-link {
+    font-size: 12px;
+    min-height: 36px;
+    gap: 4px;
+  }
+  .design-card .inspect-link svg {
+    margin-left: auto;
+    width: 16px;
+  }
+  .design-card .inspect-long {
+    display: inline;
+  }
+}

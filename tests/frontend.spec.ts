@@ -64,7 +64,7 @@ test("compositor keeps matching colour, side and view and saves a design request
   );
   await page.getByRole("button", { name: "Increase quantity" }).click();
   const href = await page
-    .getByRole("link", { name: "Ask on WhatsApp" })
+    .getByRole("link", { name: "Order on WhatsApp" })
     .getAttribute("href");
   expect(decodeURIComponent(href || "")).toContain(
     "colour: black, print side: back, view: model",
@@ -77,7 +77,8 @@ test("compositor keeps matching colour, side and view and saves a design request
     .click();
   await expect(page.locator(".modal .success")).toContainText("is saved");
   const stored = await page.evaluate(
-    () => JSON.parse(localStorage.getItem("iwbi-v1-requests") || "[]")[0],
+    () =>
+      JSON.parse(localStorage.getItem("iwbi-v1-commerce") || "{}").requests[0],
   );
   expect(stored).toMatchObject({
     name: "Test Design Customer",
@@ -104,39 +105,39 @@ test("uploaded custom request persists through reload, review and order conversi
   await expect(page.getByRole("status")).toContainText("We’ve received");
   await login(page);
   await page.goto("/admin/requests");
-  await expect(page.locator(".request-detail")).toContainText(
+  await expect(page.locator(".commerce-detail")).toContainText(
     "Test Custom Customer",
   );
-  await expect(page.getByAltText("Customer reference artwork")).toBeVisible();
+  await expect(page.locator(".commerce-art")).toBeVisible();
   await page.reload();
-  await expect(page.getByAltText("Customer reference artwork")).toBeVisible();
-  await page.getByLabel("Admin notes").fill("Artwork reviewed");
-  await page.getByLabel("Quoted total (Rs.)").fill("2400");
-  await page
-    .getByLabel("Message to customer")
-    .fill("Your artwork is ready for printing.");
-  await page
-    .getByRole("button", { name: "Send Proposal", exact: true })
-    .click();
-  await expect(page.getByRole("status")).toContainText("Proposal saved");
-  await page.getByRole("button", { name: "Convert to Order" }).click();
-  await page
-    .locator(".request-tabs")
-    .getByRole("button", { name: /Orders/ })
-    .click();
-  await expect(page.locator(".request-detail")).toContainText(
-    "Test Custom Customer",
+  await expect(page.locator(".commerce-art")).toHaveJSProperty(
+    "naturalWidth",
+    1199,
   );
-  await page.getByLabel("Mark order Printing", { exact: true }).click();
+  await page.getByLabel("Private admin note").fill("Artwork reviewed");
+  await page.getByRole("button", { name: "Save note", exact: true }).click();
+  await page.getByRole("button", { name: "Create Order", exact: true }).click();
+  await page.getByLabel("Total price (Rs.)").fill("2400");
+  await page
+    .getByRole("button", { name: "Confirm Order", exact: true })
+    .click();
+  await expect(page.locator(".order-badges")).toContainText("Unpaid");
+  await page.getByRole("button", { name: "Mark as Paid", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Start Printing", exact: true })
+    .click();
   await page.reload();
-  await expect(page.locator(".status-field select")).toHaveValue("Printing");
-  await expect(page.getByLabel("Admin notes")).toHaveValue("Artwork reviewed");
+  await expect(page.locator(".order-badges")).toContainText("Printing");
+  await expect(page.getByLabel("Private admin note")).toHaveValue(
+    "Artwork reviewed",
+  );
   await page.goto("/admin");
   await expect(page.locator(".recent-orders")).toContainText(
     "Test Custom Customer",
   );
-  await expect(page.locator(".metric-1 strong")).toHaveText("4");
-  await expect(page.locator(".donut strong")).toHaveText("5");
+  await expect(page.locator(".metric-1 strong")).toHaveText("1");
+  await expect(page.locator(".donut strong")).toHaveText("1");
+  await expect(page.locator(".metric-3 strong")).toHaveText("Rs. 2,400");
 });
 test("admin guard, invalid sign in, real demo sign in and logout", async ({
   page,
@@ -353,9 +354,10 @@ test("settings, inventory and repeated workspace search persist", async ({
   );
   await page.goto("/designs/the-climb");
   await expect(
-    page.getByRole("link", { name: "Ask on WhatsApp" }),
+    page.getByRole("link", { name: "Order on WhatsApp" }),
   ).toHaveAttribute("href", /^https:\/\/wa.me\/9779800000000\?/);
   await page.goto("/admin/inventory");
+  await page.getByRole("button", { name: "Add stock entry" }).click();
   await page.getByLabel("navy stock", { exact: true }).fill("15");
   await page.getByRole("button", { name: "Save stock", exact: true }).click();
   await page.reload();

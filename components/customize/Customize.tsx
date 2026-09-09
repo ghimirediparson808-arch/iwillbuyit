@@ -134,7 +134,7 @@ export function Customize() {
                   uploadId,
                   uploadName: file?.name,
                 });
-                repository.saveRequest(request);
+                repository.createRequest(request);
                 setSuccess(request.id);
               } catch (e) {
                 setError((e as Error).message);

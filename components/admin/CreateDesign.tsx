@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { AdminHeading } from "./AdminShell";
+import { UploadField } from "@/components/UploadField";
 import { VariantPanel } from "./VariantPanel";
 import { DesignCard } from "@/components/gallery/DesignCard";
 import { Mockup } from "@/components/design-preview/Mockup";
@@ -95,6 +96,9 @@ export function CreateDesign({ editId = "" }: { editId?: string }) {
   const busy = saving || uploading > 0 || Object.values(pending).some(Boolean);
   const display = displayArtwork(design, colour, side);
   const original = useAsset(display.source);
+  const coverPreview = useAsset(
+    design.galleryCover?.kind === "upload" ? design.galleryCover.source : "",
+  );
   async function save(published: boolean) {
     const issues = published
       ? publicationErrors(design)
@@ -292,7 +296,12 @@ export function CreateDesign({ editId = "" }: { editId?: string }) {
                 setPending((p) => ({ ...p, [key]: value }))
               }
               selectDefault={() => {
-                patch({ defaultColour: c });
+                patch({
+                  defaultColour: c,
+                  ...(!design.galleryCover
+                    ? { galleryCover: { kind: "variant" as const, colour: c } }
+                    : {}),
+                });
                 setColour(c);
               }}
             />
@@ -346,12 +355,60 @@ export function CreateDesign({ editId = "" }: { editId?: string }) {
               { value: "back", label: "Back" },
             ]}
           />
-          <h3>
-            Gallery card ·{" "}
-            {design.defaultColour
-              ? colourName(design.defaultColour)
-              : "choose a default"}
-          </h3>
+          <h3>Gallery Cover</h3>
+          <label className="field">
+            Gallery Cover source
+            <select
+              value={
+                design.galleryCover?.kind === "upload"
+                  ? "upload"
+                  : design.galleryCover?.colour || design.defaultColour || ""
+              }
+              onChange={(e) =>
+                patch({
+                  galleryCover:
+                    e.target.value === "upload"
+                      ? { kind: "upload", source: "" }
+                      : { kind: "variant", colour: e.target.value as Colour },
+                })
+              }
+            >
+              <option value="" disabled>
+                Choose a cover
+              </option>
+              {shirtColours.map((c) => (
+                <option value={c} key={c}>
+                  Use {colourName(c)} variant
+                </option>
+              ))}
+              <option value="upload">Separate transparent upload</option>
+            </select>
+          </label>
+          {design.galleryCover?.kind === "upload" && (
+            <UploadField
+              label="Gallery Cover artwork"
+              transparent
+              preview={coverPreview}
+              onValidating={(value) =>
+                setPending((p) => ({ ...p, cover: value }))
+              }
+              onFile={(file) => {
+                if (!file) {
+                  patch({ galleryCover: { kind: "upload", source: "" } });
+                  return;
+                }
+                setUploading((n) => n + 1);
+                void saveUpload(file)
+                  .then((id) =>
+                    patch({
+                      galleryCover: { kind: "upload", source: "upload:" + id },
+                    }),
+                  )
+                  .catch((e) => setErrors([(e as Error).message]))
+                  .finally(() => setUploading((n) => n - 1));
+              }}
+            />
+          )}
           <div className="editor-gallery-preview">
             <DesignCard
               design={{ ...design, name: design.name || "Your design" }}
@@ -359,8 +416,8 @@ export function CreateDesign({ editId = "" }: { editId?: string }) {
             />
           </div>
           <p className="variant-help">
-            One catalogue card, using your default colour. Customers can select
-            other enabled colours inside the design.
+            One active cover on the shared gallery canvas. This choice does not
+            change print artwork or the customer’s preview background.
           </p>
           {busy && <p role="status">Saving artwork…</p>}
           {errors.length > 0 && (

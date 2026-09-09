@@ -18,11 +18,12 @@ import {
   X,
   Search,
 } from "lucide-react";
+import { useRequests } from "@/lib/hooks";
 import { demoAuth } from "@/services/auth";
 const items = [
   { url: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { url: "/admin/designs", label: "Designs", icon: FilePenLine },
-  { url: "/admin/requests", label: "Custom Requests", icon: MessageCircle },
+  { url: "/admin/requests", label: "Requests", icon: MessageCircle },
   { url: "/admin/requests?tab=orders", label: "Orders", icon: Box },
   { url: "/admin/customers", label: "Customers", icon: Users },
   { url: "/admin/inventory", label: "Inventory", icon: Tag },
@@ -149,6 +150,7 @@ export function AdminHeading({
   search?: boolean;
 }) {
   const router = useRouter();
+  const newRequests = useRequests().filter((r) => r.status === "New").length;
   return (
     <header className="admin-heading">
       <div>
@@ -182,7 +184,7 @@ export function AdminHeading({
           aria-label="View notifications"
         >
           <Bell />
-          <i />
+          {newRequests > 0 && <i />}
         </Link>
         <Link
           href="/admin/settings"

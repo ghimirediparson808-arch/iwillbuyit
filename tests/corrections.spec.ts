@@ -44,6 +44,7 @@ test("dashboard totals and empty states are derived solely from stored records",
   await expect(page.locator(".donut strong")).toHaveText("0");
   await expect(page.locator(".recent-orders")).toContainText("No orders yet");
   await page.evaluate(() => {
+    localStorage.removeItem("iwbi-v1-commerce");
     const base = {
       phone: "",
       description: "Stored test",
@@ -81,7 +82,7 @@ test("dashboard totals and empty states are derived solely from stored records",
   });
   await page.reload();
   await expect(page.locator(".metric-0 strong")).toHaveText("1");
-  await expect(page.locator(".metric-1 strong")).toHaveText("2");
+  await expect(page.locator(".metric-1 strong")).toHaveText("1");
   await expect(page.locator(".metric-2 strong")).toHaveText("1");
   await expect(page.locator(".metric-3 strong")).toHaveText("Rs. 3,800");
   await expect(page.locator(".donut strong")).toHaveText("2");
@@ -115,7 +116,7 @@ test("all public CTAs and admin sidebar destinations navigate", async ({
   for (const label of [
     "Dashboard",
     "Designs",
-    "Custom Requests",
+    "Requests",
     "Orders",
     "Customers",
     "Inventory",

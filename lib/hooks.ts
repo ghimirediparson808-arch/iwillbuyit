@@ -85,3 +85,18 @@ export function useRequests() {
   }, []);
   return requests;
 }
+
+export function useOrders() {
+  const [orders, setOrders] = useState<import("@/types").OrderRecord[]>([]);
+  useEffect(() => {
+    const update = () => setOrders(repository.orders());
+    update();
+    window.addEventListener("iwbi-data", update);
+    window.addEventListener("storage", update);
+    return () => {
+      window.removeEventListener("iwbi-data", update);
+      window.removeEventListener("storage", update);
+    };
+  }, []);
+  return orders;
+}

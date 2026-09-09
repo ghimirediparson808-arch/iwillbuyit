@@ -17,6 +17,7 @@ export function Gallery() {
   const filtered = designs
     .filter(
       (d) =>
+        d.available !== false &&
         (category === "All" || d.category === category) &&
         (d.name + " " + d.description + " " + d.tags.join(" "))
           .toLowerCase()

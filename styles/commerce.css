@@ -1,0 +1,326 @@
+.commerce-toolbar,
+.commerce-filters,
+.commerce-actions,
+.commerce-detail-heading,
+.commerce-inbox-item > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.commerce-toolbar {
+  justify-content: space-between;
+  margin: 20px 0;
+}
+.commerce-filters {
+  margin: 0 0 20px;
+  align-items: end;
+}
+.commerce-filters > .input {
+  flex: 1;
+  min-width: 160px;
+}
+.commerce-filters .field {
+  margin: 0;
+  min-width: 130px;
+}
+.commerce-workspace {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.8fr);
+  gap: 20px;
+  align-items: start;
+}
+.commerce-inbox {
+  padding: 0 !important;
+  overflow: hidden;
+}
+.commerce-inbox > h2 {
+  padding: 22px;
+  margin: 0;
+}
+.commerce-inbox > h2 span {
+  font:
+    500 13px Manrope,
+    sans-serif;
+  color: var(--muted);
+  margin-left: 8px;
+}
+.commerce-inbox-item {
+  display: block;
+  padding: 20px;
+  border-top: 1px solid var(--line);
+  color: inherit;
+}
+.commerce-inbox-item.selected {
+  background: #edf2f6;
+  border-left: 3px solid var(--iwbi-navy);
+  padding-left: 17px;
+}
+.commerce-inbox-item > div {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.commerce-inbox-item strong {
+  overflow-wrap: anywhere;
+}
+.commerce-inbox-item small,
+.commerce-detail-heading p {
+  color: var(--muted);
+  font-size: 12px;
+}
+.commerce-inbox-item p {
+  margin: 10px 0;
+  font-size: 13px;
+}
+.commerce-kind {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.commerce-detail {
+  min-width: 0;
+  padding: 28px !important;
+}
+.commerce-detail-heading {
+  align-items: start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.commerce-detail-heading h2 {
+  margin: 6px 0;
+}
+.commerce-detail-heading p {
+  margin: 6px 0;
+}
+.commerce-submission {
+  display: grid;
+  grid-template-columns: minmax(100px, 190px) minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+.commerce-art {
+  width: 100%;
+  height: 210px;
+  object-fit: contain;
+  padding: 20px;
+  border-radius: 14px;
+  background: #98a2a8;
+}
+.empty-art {
+  display: grid;
+  place-items: center;
+  text-align: center;
+  font-size: 12px;
+}
+.commerce-submission dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.commerce-submission dt {
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+.commerce-submission dd {
+  margin: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+  text-transform: capitalize;
+}
+.commerce-submission dd small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+.original-message {
+  margin: 24px 0;
+  background: var(--iwbi-ivory);
+  border-radius: 14px;
+  padding: 18px;
+}
+.original-message h3,
+.private-note label,
+.commerce-timeline h3 {
+  font-size: 14px;
+}
+.original-message p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.8;
+  margin-bottom: 0;
+}
+.commerce-actions {
+  margin: 20px 0;
+}
+.commerce-actions .button {
+  min-height: 44px;
+  padding: 11px 16px;
+  font-size: 12px;
+  white-space: normal;
+}
+.private-note {
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+}
+.private-note .button {
+  font-size: 12px;
+}
+.commerce-timeline {
+  margin: 24px 0;
+}
+.commerce-timeline ol {
+  list-style: none;
+  padding: 0 0 0 16px;
+  border-left: 1px solid var(--line);
+}
+.commerce-timeline li {
+  margin: 15px 0;
+}
+.commerce-timeline p {
+  font-size: 12px;
+  margin: 0 0 3px;
+}
+.commerce-timeline time {
+  font-size: 11px;
+  color: var(--muted);
+}
+.order-badges {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.commerce-empty {
+  padding: 32px 22px;
+  color: var(--muted);
+}
+.commerce-empty h3 {
+  color: var(--iwbi-navy);
+  font-size: 16px;
+}
+.commerce-empty p {
+  font-size: 13px;
+  line-height: 1.7;
+}
+.commerce-back {
+  display: none !important;
+}
+.commerce-explainer {
+  font-size: 13px;
+  line-height: 1.7;
+  background: var(--iwbi-ivory);
+  padding: 16px;
+  border-radius: 12px;
+}
+.order-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 24px;
+}
+.order-form .field {
+  margin: 0;
+  min-width: 0;
+}
+.order-form-wide {
+  grid-column: 1/-1;
+}
+.secondary-actions {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+.button.danger {
+  color: #a52731;
+  background: #fff5f4;
+  border: 1px solid #e7b8bc;
+}
+.button.danger:hover {
+  background: #fbe4e4;
+}
+.toast button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.commerce-detail .status-badge,
+.commerce-inbox .status-badge {
+  white-space: normal;
+  font-size: 11px;
+}
+.commerce-detail-heading a {
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1100px) {
+  .commerce-workspace {
+    grid-template-columns: minmax(230px, 0.8fr) minmax(0, 1.5fr);
+  }
+  .commerce-submission {
+    grid-template-columns: 120px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .commerce-submission dl {
+    grid-template-columns: 1fr;
+  }
+  .commerce-detail {
+    padding: 22px !important;
+  }
+}
+@media (max-width: 700px) {
+  .commerce-workspace {
+    grid-template-columns: 1fr;
+  }
+  .commerce-workspace:not(.has-selection) .commerce-detail {
+    display: none;
+  }
+  .commerce-workspace.has-selection .commerce-inbox {
+    display: none;
+  }
+  .commerce-back {
+    display: inline-flex !important;
+    margin-bottom: 22px;
+  }
+  .commerce-filters > .input {
+    flex-basis: 100%;
+  }
+  .commerce-filters .field {
+    flex: 1;
+  }
+  .commerce-toolbar .button {
+    width: 100%;
+  }
+  .commerce-detail {
+    padding: 20px !important;
+  }
+  .commerce-submission {
+    grid-template-columns: 100px minmax(0, 1fr);
+  }
+  .commerce-art {
+    height: 150px;
+    padding: 12px;
+  }
+  .commerce-actions .button {
+    flex: 1;
+  }
+  .commerce-detail-heading {
+    gap: 16px;
+  }
+  .order-form {
+    gap: 14px;
+  }
+  .order-form .field {
+    font-size: 12px;
+  }
+}
+@media (max-width: 700px) {
+  .commerce-actions > .button:not(.secondary) {
+    flex-basis: 100%;
+  }
+  .commerce-actions.secondary-actions > .button {
+    flex: 1 1 130px;
+  }
+}

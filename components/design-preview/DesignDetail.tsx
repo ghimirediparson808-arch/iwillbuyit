@@ -27,6 +27,7 @@ export function DesignDetail({ slug }: { slug: string }) {
   const [modal, setModal] = useState<"zoom" | "size" | "request" | null>(null);
   const [expanded, setExpanded] = useState(false);
   const [success, setSuccess] = useState("");
+  const [requestId, setRequestId] = useState("");
   const [error, setError] = useState("");
   const display = design ? displayArtwork(design, colour, side) : undefined;
   const art = useAsset(display?.source);
@@ -41,6 +42,7 @@ export function DesignDetail({ slug }: { slug: string }) {
         ? value.colour
         : design.defaultColour || "navy",
     );
+    setRequestId(value.lastRequestId || "");
     setSide(value.side || "front");
     setView(value.view || "product");
     setSize(value.size || "M");
@@ -62,11 +64,12 @@ export function DesignDetail({ slug }: { slug: string }) {
         view,
         size,
         quantity,
+        lastRequestId: requestId,
       });
     } catch {
       /* Selections stay usable when browser preferences cannot be saved. */
     }
-  }, [design, restored, colour, side, view, size, quantity]);
+  }, [design, restored, colour, side, view, size, quantity, requestId]);
   useEffect(() => {
     if (!design || restored !== design.id) return;
     if (!availableColours(design).includes(colour) && design.defaultColour)
@@ -86,7 +89,7 @@ export function DesignDetail({ slug }: { slug: string }) {
         </Link>
       </main>
     );
-  const message = `Hi I WILL BUY IT! I’d like ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}, variant: ${variantIdentity(design, colour, side)}. Please confirm availability and price.`;
+  const message = `Hi I WILL BUY IT! I’d like to order ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}, variant: ${variantIdentity(design, colour, side)}. Please confirm availability and price.${requestId ? ` Request ID: ${requestId}.` : ""}`;
   return (
     <main id="main" className="detail-main">
       <nav className="breadcrumb" aria-label="Breadcrumb">
@@ -235,15 +238,24 @@ export function DesignDetail({ slug }: { slug: string }) {
               >
                 Request This Design
               </button>
-              <a
-                className="button secondary"
-                href={whatsappUrl(message, settings.whatsapp)}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <img src="/assets/svg/whatsapp-outline.svg" alt="" />
-                Ask on WhatsApp
-              </a>
+              {design.available === false ||
+              !allowedColours.includes(colour) ||
+              !allowedSides.includes(side) ? (
+                <button className="button secondary" disabled>
+                  <img src="/assets/svg/whatsapp-outline.svg" alt="" />
+                  Order on WhatsApp
+                </button>
+              ) : (
+                <a
+                  className="button secondary"
+                  href={whatsappUrl(message, settings.whatsapp)}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <img src="/assets/svg/whatsapp-outline.svg" alt="" />
+                  Order on WhatsApp
+                </a>
+              )}
             </div>
           </div>
         </section>
@@ -313,8 +325,9 @@ export function DesignDetail({ slug }: { slug: string }) {
                     variantArtwork: display?.source,
                     previewBackground: display?.tone,
                   });
-                  repository.saveRequest(request);
+                  repository.createRequest(request);
                   setSuccess(request.id);
+                  setRequestId(request.id);
                 } catch (e) {
                   setError((e as Error).message);
                 }

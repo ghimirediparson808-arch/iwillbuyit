@@ -1,27 +1,8 @@
 import seed from "@/data/designs.json";
-import adminSeed from "@/data/admin-seed.json";
 import type { Design, RequestRecord } from "@/types";
 import { migrateDesign, publicationErrors } from "./artwork";
-const prefix = "iwbi-v1-";
-function read<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-  try {
-    const raw = localStorage.getItem(prefix + key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-function write(key: string, value: unknown, notify = true) {
-  try {
-    localStorage.setItem(prefix + key, JSON.stringify(value));
-    if (notify) window.dispatchEvent(new Event("iwbi-data"));
-  } catch {
-    throw new Error(
-      "Your browser storage is full or unavailable. Free some space and try again.",
-    );
-  }
-}
+import { read, write } from "./storage";
+import { commerceActions } from "./commerce";
 export const asset = (path: string) =>
   path.startsWith("../") ? "/assets/" + path.slice(3) : path;
 const rawLaunchDesigns: Design[] = seed.map((d) => ({
@@ -34,7 +15,9 @@ const rawLaunchDesigns: Design[] = seed.map((d) => ({
 }));
 export const launchDesigns = rawLaunchDesigns.map(migrateDesign);
 export const repository = {
+  ...commerceActions,
   designs(includeDrafts = false): Design[] {
+    if (typeof window !== "undefined") repository.finalizeDesignRemovals();
     const all = [...rawLaunchDesigns, ...read<Design[]>("designs", [])];
     const overrides = read<Record<string, Partial<Design>>>(
       "design-updates",
@@ -42,6 +25,7 @@ export const repository = {
     );
     return all
       .map((d) => migrateDesign({ ...d, ...overrides[d.id] }))
+      .filter((d) => !read<Record<string, number>>("removed-designs", {})[d.id])
       .filter((d) => includeDrafts || d.published !== false);
   },
   saveDesign(design: Design) {
@@ -77,36 +61,48 @@ export const repository = {
     const values = read<Record<string, Partial<Design>>>("design-updates", {});
     write("design-updates", { ...values, [id]: { ...values[id], ...patch } });
   },
-  requests(): RequestRecord[] {
-    return read<RequestRecord[]>("requests", seedRequests());
+
+  markDesignUnavailable(id: string) {
+    repository.updateDesign(id, { available: false });
   },
-  saveRequest(value: RequestRecord) {
-    write("requests", [
-      value,
-      ...repository.requests().filter((r) => r.id !== value.id),
-    ]);
+  makeDesignAvailable(id: string) {
+    repository.updateDesign(id, { available: true });
   },
-  updateRequest(id: string, patch: Partial<RequestRecord>, activity?: string) {
-    const values = repository.requests();
-    const entry = values.find((r) => r.id === id);
-    if (!entry) return;
-    write(
-      "requests",
-      values.map((r) =>
-        r.id === id
-          ? {
-              ...r,
-              ...patch,
-              activity: activity
-                ? [
-                    ...r.activity,
-                    { text: activity, at: new Date().toISOString() },
-                  ]
-                : r.activity,
-            }
-          : r,
-      ),
+  removeDesign(id: string) {
+    if (!repository.designs(true).some((d) => d.id === id))
+      throw new Error("Design not found.");
+    repository.orders(); // Materialize historical snapshots before removing their source.
+    write("removed-designs", {
+      ...read<Record<string, number>>("removed-designs", {}),
+      [id]: Date.now() + 10000,
+    });
+  },
+  undoRemoveDesign(id: string) {
+    const removed = read<Record<string, number>>("removed-designs", {});
+    if (!removed[id] || removed[id] < Date.now())
+      throw new Error("The Undo period has ended.");
+    delete removed[id];
+    write("removed-designs", removed);
+  },
+  finalizeDesignRemovals() {
+    const removed = read<Record<string, number>>("removed-designs", {});
+    const expired = Object.keys(removed).filter(
+      (id) => removed[id] > 1 && removed[id] < Date.now(),
     );
+    if (!expired.length) return;
+    const updates = read<Record<string, Partial<Design>>>("design-updates", {});
+    expired.forEach((id) => delete updates[id]);
+    write("design-updates", updates, false);
+    write(
+      "designs",
+      read<Design[]>("designs", []).filter((d) => !expired.includes(d.id)),
+      false,
+    );
+    expired.forEach((id) => {
+      removed[id] = 1;
+    });
+    write("removed-designs", removed, false);
+    // Keep only ID tombstones for bundled designs; original source files are immutable.
   },
   selections(id: string) {
     return read<
@@ -116,6 +112,7 @@ export const repository = {
         view: "product" | "model";
         size: string;
         quantity: number;
+        lastRequestId: string;
       }>
     >("selection-" + id, {});
   },
@@ -133,71 +130,12 @@ export const repository = {
     write("settings", value);
   },
   stock() {
-    return read("stock", [
-      { colour: "navy", size: "L", count: 5 },
-      { colour: "black", size: "XL", count: 3 },
-      { colour: "cream", size: "M", count: 4 },
-    ]);
+    return read<{ colour: string; size: string; count: number }[]>("stock", []);
   },
   saveStock(value: { colour: string; size: string; count: number }[]) {
     write("stock", value);
   },
 };
-function seedRequests(): RequestRecord[] {
-  const names = [
-    "Suman Karki",
-    "Aayush Shrestha",
-    "Nisha Rai",
-    "Roshan Thapa",
-    "Priya Gurung",
-    "Karan Basnet",
-    "Anjali Lama",
-    "Manish Adhikari",
-  ];
-  const custom: RequestRecord[] = names.map((name, i) => ({
-    id: `IWBI-R${108 - i}`,
-    name,
-    phone: "",
-    description:
-      i === 0
-        ? "Minimal line artwork inspired by reaching higher. Front print on a navy T-shirt."
-        : launchDesigns[i % 7].description,
-    designId: launchDesigns[i % 7].id,
-    colour: "navy",
-    side: "front",
-    size: "L",
-    quantity: 2,
-    createdAt: `2026-09-${String(8 - Math.floor(i / 2)).padStart(2, "0")}T09:42:00`,
-    neededBy: "2026-09-18",
-    status: ["New Request", "Needs Info", "Proposal Ready", "Approved"][i % 4],
-    available: i % 4 === 3,
-    notes: "",
-    activity: [
-      { text: "Request submitted", at: "2026-09-08T09:42:00" },
-      { text: "Awaiting review", at: "2026-09-08T10:05:00" },
-    ],
-  }));
-  return [
-    ...custom,
-    ...adminSeed.recentOrders.map((o) => ({
-      id: o.id,
-      name: o.name,
-      phone: "",
-      description: o.design,
-      colour: "navy" as const,
-      side: "front" as const,
-      size: "L",
-      quantity: 1,
-      createdAt: "2026-09-08T10:24:00",
-      status: "Approved",
-      orderStatus: o.status,
-      available: true,
-      notes: "",
-      quote: o.total,
-      activity: [{ text: "Order created", at: "2026-09-08T10:24:00" }],
-    })),
-  ];
-}
 export function newRequest(
   values: Omit<
     RequestRecord,
@@ -207,9 +145,9 @@ export function newRequest(
   const at = new Date().toISOString();
   return {
     ...values,
-    id: `IWBI-R${Date.now().toString().slice(-8)}`,
+    id: `IWBI-R${crypto.randomUUID().slice(0, 8).toUpperCase()}`,
     createdAt: at,
-    status: "New Request",
+    status: "New",
     available: false,
     notes: "",
     activity: [{ text: "Request submitted", at }],

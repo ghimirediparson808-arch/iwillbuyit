@@ -1,6 +1,43 @@
 # Visual and interaction QA
 
-## Current pass: admin-controlled colour variants — 9 September 2026
+## Current pass: WhatsApp-first requests, orders and gallery — 9 September 2026
+
+The latest user request explicitly simplifies the request/order workflow and changes gallery canvases. These instructions supersede the older proposal/checklist UI, combined request/order records, seeded demo records and default-colour gallery backgrounds described in historical sections below. The approved palette, typography, logo, curves, garment previews, variant authority and homepage geometry remain intact.
+
+- Gallery: one muted navy-grey/stone CSS canvas across all cards; contain-sized unmodified artwork; equal artwork/footer heights, two-line names and aligned Inspect actions. Gallery Cover selects Navy, Black, Cream or one separate transparent upload. A subtle alpha shadow is scoped to gallery images; original/print files remain untouched. Detail colour/background changes never change the gallery canvas.
+- Library: Edit Design, Published/Draft/Unavailable state, availability toggle, red Remove Design with 10-second Undo. Official JSON/assets are immutable; expired local deletion uses ID tombstones for launch records. Order snapshots retain agreed name/code, artwork, garment, quantity and prices after edit/removal.
+- Requests: New / Contacted / Converted to Order / Closed. Read-only customer submissions, Gallery Design / Custom Design badges, private notes and activity. WhatsApp contact, linked order confirmation, close/reopen and accidental unconverted deletion replace proposal/checklist controls.
+- Orders: explicit manual creation or idempotent request conversion. Independent Unpaid/Paid/Refunded and Confirmed/Printing/Ready/Delivered/Cancelled states. One stage action, WhatsApp secondary, cancel/archive/restore and guarded never-paid manual removal/Undo. Cancelling a paid order preserves Paid until explicitly refunded.
+- Dashboard: New Requests, Active Orders, In Printing and Total Paid Sales use real repository records. Fresh storage has zero customers, requests, orders, stock entries and sales. Paid sales include paid archived/cancelled orders and exclude refunds. Test fixtures exist only in isolated automated tests.
+- Public ordering: Order on WhatsApp includes current design identity, colour, size, quantity, side and a saved request ID when present; Request This Design remains trackable. No checkout or gateway was added. Demo auth remains browser-only.
+
+### Current verification
+
+**All 28 production scenarios passed in one run (2.0 minutes).** After the final phone spacing and legacy snapshot refinements, all 10 affected workflow/domain scenarios passed again (42.2 seconds). Final lint, TypeScript and production build pass; Git whitespace checks pass. Prior 18 scenarios are retained with obsolete assertions updated to the requested workflow.
+
+A long-name card-height discrepancy was caught and fixed. Phone card names now have their own full-width area above a larger Inspect link; primary request/order actions are full-width on phones. Exact form labels, shared canvas comparisons across production CSS minification, and screenshot readiness were tightened. Legacy migration now preserves request design names/artwork, and conversion retains explicitly captured artwork when the agreed variant is unchanged. No loading-screen capture is accepted as visual evidence.
+
+All 24 supplied reference-sized pages were recaptured and visually reviewed with zero browser/runtime/HTTP errors, missing images or horizontal overflow. Gallery and Requests were recaptured again at their six supplied dimensions after the final styling changes, with the same clean results. The existing nine landing-size results remain applicable to unchanged hero geometry. Final populated captures below were visually reviewed and use isolated test submissions, one manual order and gallery fixtures exercising white, black, colourful artwork and a long name; production storage is never seeded.
+
+| Current page | Desktop 1672×941 | Tablet 1086×1448 | Phone 390×844 |
+| --- | --- | --- | --- |
+| Gallery | [Capture](commerce-gallery-desktop.png) | [Capture](commerce-gallery-tablet.png) | [Capture](commerce-gallery-mobile.png) |
+| Requests | [Capture](commerce-requests-desktop.png) | [Capture](commerce-requests-tablet.png) | [Capture](commerce-requests-mobile.png) |
+| Orders | [Capture](commerce-orders-desktop.png) | [Capture](commerce-orders-tablet.png) | [Capture](commerce-orders-mobile.png) |
+
+### Boundaries and remaining visual approval
+
+**Frontend workflow is ready for backend integration.** The browser repository provides the replaceable action boundary. Real authentication, multi-user transactions, durable upload storage and server validation remain backend responsibilities. Uploaded binaries are retained for historical snapshots and explicit reuse; automatic orphan-file garbage collection is not implemented. Legacy combined records migrate once, preserving stored history; payment inference occurs only during this migration.
+
+**Hero artwork mismatch remains unresolved.** The supplied 939×1675 portrait has different facial geometry and an abruptly terminated right hair edge; its alpha bounds fill the canvas. CSS cannot recreate the reference drawing without distortion or inventing details. `HeroArtwork` remains replaceable and proportional. Corrected transparent source/derivatives are still needed before final landing artwork approval. No assets were redrawn, regenerated, recoloured or replaced in this pass.
+
+### Main changed files
+
+`services/commerce.ts`, `services/storage.ts`, `services/repository.ts`, `services/dashboard.ts`, `services/artwork.ts`, `types/index.ts`, `lib/hooks.ts`; admin Requests, Dashboard, AdminSections, AdminShell and CreateDesign components; gallery Gallery/DesignCard and public DesignDetail/Customize components; `styles/commerce.css` and scoped gallery rules in `styles/globals.css`; workflow/domain and updated regression tests; README and root continuity documents.
+
+---
+
+## Previous pass: admin-controlled colour variants — 9 September 2026
 
 The user explicitly superseded the earlier compatibility fallback. **No current publishing rule assesses contrast, removes selected colours, forces Cream or invents artwork reuse.** The earlier report below is historical; its compatible-colour restriction and hidden unavailable options no longer apply.
 

@@ -10,13 +10,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { dashboardData, salesSeries } from "@/services/dashboard";
-import { useRequests } from "@/lib/hooks";
+import { useOrders } from "@/lib/hooks";
 import { repository } from "@/services/repository";
 import { AdminHeading } from "./AdminShell";
 export function SalesChart() {
   const [range, setRange] = useState(30);
-  const requests = useRequests();
-  const series = salesSeries(requests, range);
+  const orders = useOrders();
+  const series = salesSeries(orders, range);
   const data = series.map((d) => d.value);
   const maximum = Math.max(
     1000,
@@ -141,7 +141,8 @@ export function Dashboard() {
     window.addEventListener("iwbi-data", update);
     return () => window.removeEventListener("iwbi-data", update);
   }, []);
-  const snapshot = dashboardData(requests);
+  const orders = useOrders();
+  const snapshot = dashboardData(requests, orders);
   const recentOrders = snapshot.orders
     .slice()
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -149,12 +150,9 @@ export function Dashboard() {
     .map((r) => ({
       id: r.id,
       name: r.name,
-      design:
-        repository.designs(true).find((d) => d.id === r.designId)?.name ||
-        r.description ||
-        "Custom design",
-      status: r.orderStatus!,
-      total: r.quote || 0,
+      design: r.snapshot.name,
+      status: r.productionStatus,
+      total: r.total,
       updated: new Date(r.activity.at(-1)?.at || r.createdAt).toLocaleString(
         "en-GB",
         { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" },
@@ -180,19 +178,19 @@ export function Dashboard() {
       icon: FilePenLine,
     },
     {
-      title: "Confirmed Orders",
+      title: "Active Orders",
       value: snapshot.confirmed,
-      caption: "Stored orders",
+      caption: "Awaiting delivery",
       icon: Box,
     },
     {
-      title: "In Production",
+      title: "In Printing",
       value: snapshot.production,
       caption: "Active now",
       icon: Settings,
     },
     {
-      title: "Total Sales",
+      title: "Total Paid Sales",
       value: "Rs. " + snapshot.sales.toLocaleString(),
       caption: "Paid order value",
       icon: ChartNoAxesColumnIncreasing,
@@ -314,8 +312,13 @@ export function Dashboard() {
               View all <ArrowRight />
             </Link>
           </div>
+          {!stock.length && <p>No stock entries yet.</p>}
           {stock.map((s) => (
-            <Link key={s.colour} href="/admin/inventory" className="stock-row">
+            <Link
+              key={s.colour + s.size}
+              href="/admin/inventory"
+              className="stock-row"
+            >
               <img
                 src={`/assets/mockups/product/front/${s.colour}.webp`}
                 alt={`${s.colour} T-shirt`}

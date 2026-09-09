@@ -12,3 +12,4 @@ qa/*.png
 qa/*.log
 
 qa/*.jpg
+.env.local
