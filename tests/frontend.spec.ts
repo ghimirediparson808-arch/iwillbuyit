@@ -165,6 +165,10 @@ test("transparent upload, draft, publish and public catalogue persistence", asyn
 }) => {
   await login(page);
   await page.goto("/admin/designs/new");
+  await page.getByLabel("Enable Cream", { exact: true }).check();
+  await page
+    .getByLabel("Default display colour: Cream", { exact: true })
+    .check();
   await page
     .getByLabel("Design name", { exact: true })
     .fill("Test Launch Artwork");
@@ -172,7 +176,7 @@ test("transparent upload, draft, publish and public catalogue persistence", asyn
     .getByLabel("Full description")
     .fill("An approved transparent coffee illustration.");
   await page
-    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
+    .getByLabel("Cream front artwork", { exact: true })
     .setInputFiles(art);
   await page.getByRole("button", { name: "Save Draft", exact: true }).click();
   await expect(page.locator(".success[role=status]")).toContainText(
@@ -278,24 +282,28 @@ test("invalid uploads, draft preview, restricted garments and keyboard dialog", 
 }) => {
   await login(page);
   await page.goto("/admin/designs/new");
+  await page.getByLabel("Enable Cream", { exact: true }).check();
   await page
-    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
-    .setInputFiles({
-      name: "invalid.png",
-      mimeType: "image/png",
-      buffer: Buffer.from("not an image"),
-    });
-  await expect(page.locator(".original-upload .error")).toContainText(
+    .getByLabel("Default display colour: Cream", { exact: true })
+    .check();
+  await page
+    .getByLabel("Full description")
+    .fill("A deliberately selected Cream variant.");
+  await page.getByLabel("Cream front artwork", { exact: true }).setInputFiles({
+    name: "invalid.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("not an image"),
+  });
+  await expect(page.locator(".variants-section .error")).toContainText(
     "not a valid image",
   );
   await page
-    .getByLabel("Dark artwork (Cream shirts)", { exact: true })
+    .getByLabel("Cream front artwork", { exact: true })
     .setInputFiles(art);
   await page
     .getByLabel("Design name", { exact: true })
     .fill("Cream Only Draft");
-  await page.getByLabel("Navy", { exact: true }).uncheck();
-  await page.getByLabel("Black", { exact: true }).uncheck();
+
   await page.getByRole("button", { name: "Save Draft", exact: true }).click();
   await expect(page.locator(".success[role=status]")).toContainText(
     "Draft saved",

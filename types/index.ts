@@ -1,7 +1,18 @@
 export type Colour = "navy" | "black" | "cream";
 export type Side = "front" | "back";
 export type View = "product" | "model";
+export type ColourVariant = {
+  enabled: boolean;
+  background: Colour;
+  front?: string;
+  back?: string;
+  reuseFront?: Colour;
+  reuseBack?: Colour;
+};
 export type Design = {
+  schemaVersion?: 2;
+  variants?: Record<Colour, ColourVariant>;
+  defaultColour?: Colour;
   id: string;
   slug: string;
   name: string;
@@ -38,6 +49,9 @@ export type RequestRecord = {
   quantity: number;
   view?: View;
   designId?: string;
+  variantId?: string;
+  variantArtwork?: string;
+  previewBackground?: Colour;
   uploadId?: string;
   uploadName?: string;
   createdAt: string;

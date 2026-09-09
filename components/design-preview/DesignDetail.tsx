@@ -8,7 +8,12 @@ import { ColourControl, Quantity, Segmented } from "./Controls";
 import { Eyebrow } from "@/components/site/Decorations";
 import { Modal } from "@/components/Modal";
 import { newRequest, repository, whatsappUrl } from "@/services/repository";
-import { displayArtwork } from "@/services/artwork";
+import {
+  displayArtwork,
+  availableColours,
+  printSides,
+  variantIdentity,
+} from "@/services/artwork";
 import type { Colour, Side, View } from "@/types";
 export function DesignDetail({ slug }: { slug: string }) {
   const settings = useSettings();
@@ -23,30 +28,30 @@ export function DesignDetail({ slug }: { slug: string }) {
   const [expanded, setExpanded] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
-  const display = design ? displayArtwork(design) : undefined;
-  const art = useAsset(
-    design?.artworkVariants
-      ? display?.source
-      : design?.darkShirtAsset
-          .replace("/master/print-", "/web/detail-")
-          .replace(".png", ".webp"),
-  );
+  const display = design ? displayArtwork(design, colour, side) : undefined;
+  const art = useAsset(display?.source);
+  const allowedColours = design ? availableColours(design) : [];
+  const allowedSides = design ? printSides(design, colour) : [];
   const [restored, setRestored] = useState("");
   useEffect(() => {
-    if (!design?.id) return;
+    if (!design?.id || restored === design.id) return;
     const value = repository.selections(design.id);
-    setColour(value.colour || "navy");
+    setColour(
+      value.colour && availableColours(design).includes(value.colour)
+        ? value.colour
+        : design.defaultColour || "navy",
+    );
     setSide(value.side || "front");
     setView(value.view || "product");
     setSize(value.size || "M");
     setQuantity(Math.max(1, Math.min(99, value.quantity || 1)));
     setRestored(design.id);
-  }, [design?.id]);
+  }, [design, restored]);
   useEffect(() => {
     if (!design || restored !== design.id) return;
     if (
-      (design.colours?.length && !design.colours.includes(colour)) ||
-      (design.sides?.length && !design.sides.includes(side)) ||
+      !availableColours(design).includes(colour) ||
+      !printSides(design, colour).includes(side) ||
       (design.sizes?.length && !design.sizes.includes(size))
     )
       return;
@@ -63,14 +68,14 @@ export function DesignDetail({ slug }: { slug: string }) {
     }
   }, [design, restored, colour, side, view, size, quantity]);
   useEffect(() => {
-    if (!design) return;
-    if (design.colours?.length && !design.colours.includes(colour))
-      setColour(design.colours[0]);
-    if (design.sides?.length && !design.sides.includes(side))
-      setSide(design.sides[0]);
+    if (!design || restored !== design.id) return;
+    if (!availableColours(design).includes(colour) && design.defaultColour)
+      setColour(design.defaultColour);
+    const sides = printSides(design, colour);
+    if (!sides.includes(side) && sides.length) setSide(sides[0]);
     if (design.sizes?.length && !design.sizes.includes(size))
       setSize(design.sizes[0]);
-  }, [design, colour, side, size]);
+  }, [design, restored, colour, side, size]);
   if (!design)
     return (
       <main id="main" className="empty-state">
@@ -81,7 +86,7 @@ export function DesignDetail({ slug }: { slug: string }) {
         </Link>
       </main>
     );
-  const message = `Hi I WILL BUY IT! I’d like ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}. Please confirm availability and price.`;
+  const message = `Hi I WILL BUY IT! I’d like ${design.name} (${design.id}), colour: ${colour}, print side: ${side}, view: ${view}, size: ${size}, quantity: ${quantity}, variant: ${variantIdentity(design, colour, side)}. Please confirm availability and price.`;
   return (
     <main id="main" className="detail-main">
       <nav className="breadcrumb" aria-label="Breadcrumb">
@@ -98,11 +103,11 @@ export function DesignDetail({ slug }: { slug: string }) {
           >
             <img
               className={
-                design.artworkVariants
+                design.variants
                   ? "artwork-surface artwork-" + display?.tone
                   : undefined
               }
-              src={art || design.thumbnail}
+              src={art || "/assets/placeholders/design-placeholder.svg"}
               alt=""
             />
             <span>
@@ -114,10 +119,10 @@ export function DesignDetail({ slug }: { slug: string }) {
           <div className="original-content">
             <Eyebrow>ORIGINAL ARTWORK</Eyebrow>
             <div
-              className={`original-image ${design.artworkVariants ? "artwork-surface artwork-" + display?.tone : ""}`}
+              className={`original-image ${design.variants ? "artwork-surface artwork-" + display?.tone : ""}`}
             >
               <img
-                src={art || design.thumbnail}
+                src={art || "/assets/placeholders/design-placeholder.svg"}
                 alt={`${design.name}, original artwork`}
               />
             </div>
@@ -138,14 +143,20 @@ export function DesignDetail({ slug }: { slug: string }) {
             ]}
           />
           <div className="large-mockup">
-            <Mockup design={design} colour={colour} side={side} view={view} />
+            <Mockup
+              design={design}
+              colour={colour}
+              side={side}
+              view={view}
+              artworkUrl={art}
+            />
           </div>
           <div className="preview-bottom">
             <Segmented
               label="Preview side"
               value={side}
               onChange={setSide}
-              options={(design.sides || ["front", "back"]).map((s) => ({
+              options={allowedSides.map((s) => ({
                 value: s,
                 label: s === "front" ? "Front" : "Back",
               }))}
@@ -173,7 +184,7 @@ export function DesignDetail({ slug }: { slug: string }) {
               <ColourControl
                 value={colour}
                 onChange={setColour}
-                allowed={design.colours}
+                allowed={allowedColours}
               />
             </div>
             <div className="size-group">
@@ -202,7 +213,7 @@ export function DesignDetail({ slug }: { slug: string }) {
                 label="Print side"
                 value={side}
                 onChange={setSide}
-                options={(design.sides || ["front", "back"]).map((s) => ({
+                options={allowedSides.map((s) => ({
                   value: s,
                   label: s === "front" ? "Front" : "Back",
                 }))}
@@ -212,7 +223,11 @@ export function DesignDetail({ slug }: { slug: string }) {
               <p>Price confirmed after your request.</p>
               <button
                 className="button"
-                disabled={design.available === false}
+                disabled={
+                  design.available === false ||
+                  !allowedColours.includes(colour) ||
+                  !allowedSides.includes(side)
+                }
                 onClick={() => {
                   setSuccess("");
                   setModal("request");
@@ -238,7 +253,13 @@ export function DesignDetail({ slug }: { slug: string }) {
           title={`${design.name} — ${colour}, ${side}`}
           onClose={() => setModal(null)}
         >
-          <Mockup design={design} colour={colour} side={side} view={view} />
+          <Mockup
+            design={design}
+            colour={colour}
+            side={side}
+            view={view}
+            artworkUrl={art}
+          />
         </Modal>
       )}
       {modal === "size" && (
@@ -288,6 +309,9 @@ export function DesignDetail({ slug }: { slug: string }) {
                     size,
                     quantity,
                     designId: design.id,
+                    variantId: variantIdentity(design, colour, side),
+                    variantArtwork: display?.source,
+                    previewBackground: display?.tone,
                   });
                   repository.saveRequest(request);
                   setSuccess(request.id);

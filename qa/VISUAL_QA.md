@@ -1,6 +1,51 @@
 # Visual and interaction QA
 
-## Focused correction pass — 9 September 2026
+## Current pass: admin-controlled colour variants — 9 September 2026
+
+The user explicitly superseded the earlier compatibility fallback. **No current publishing rule assesses contrast, removes selected colours, forces Cream or invents artwork reuse.** The earlier report below is historical; its compatible-colour restriction and hidden unavailable options no longer apply.
+
+### Delivered behavior
+
+- One schema-version-2 design record contains Navy/Black/Cream variants, explicit enabled state, per-colour front/back artwork, explicit reuse references, preview background and one enabled default. The catalogue still creates one card per design.
+- Create/Edit Design separates shared information, three visible variant panels and live original/product/model/gallery previews. Admins can use different files for every colour, reuse one stored file across colours, and override one colour independently. PNG/WebP bytes and alpha are preserved; no filters, inversion or recolouring are applied.
+- Default preview background equals the shirt colour, and each background can be changed manually. Gallery display uses the default variant. Public detail selection synchronizes original artwork/background and real garment/model assets. Unavailable swatches remain visible with diagonal strikes, disabled behavior and accessible labels.
+- Incomplete drafts save and reopen through the library's Edit design link or the saved edit URL. Uploads stay in IndexedDB. A missing required file, broken/cyclic reuse or disabled default produces a specific publication error; low contrast does not. Reusing one upload does not create another binary copy.
+- Saved detail choices survive reload. Fixed a discovered restore-order race where the default could overwrite the restored colour. One shared resolved image URL drives both original and print views, avoiding stale artwork on a newly selected background.
+- Requests store design ID, selected colour/size/quantity/side/view, variant ID and artwork/background snapshot. WhatsApp details contain the selected variant identity. External messages are not sent automatically.
+- A read adapter migrates official and older stored records without deleting or duplicating them. All seven official codes, names, descriptions, order and assets remain intact. Previous Navy default and working garment/side/size assignments are retained; explicitly restricted legacy records keep those restrictions. Edits persist schema version 2. No immutable data/source asset was rewritten.
+- How It Works now has a real homepage section at `/#how-it-works`, using the established three-step process and approved palette/type. Desktop and mobile navigation from every public content route scrolls to and focuses its heading, with reduced-motion support and navigation clearance. Public Admin Login, auth protection and sidebar View Website remain working.
+
+### Scenario and regression results
+
+All **18 automated scenarios passed in one development run (4.7 minutes)**. Final lint, TypeScript and production build all pass after the preview-bound correction. The original nine frontend scenarios and three still-applicable prior correction tests remain; two obsolete ink-compatibility tests were replaced by six tests for the new requirements.
+
+| Required scenario | Verified result | Visual evidence |
+| --- | --- | --- |
+| A: Cream only | Cream starts selected; Navy/Black visibly crossed out and disabled; one additional card | [Cream](scenario-a-cream.png) |
+| B: Black and Cream | One record; distinct front/back files; both colours × both sides × product/model; original/print URL match; reload; variant-aware request/WhatsApp | [Product Black](scenario-b-product-front-black.png), [Product Cream](scenario-b-product-front-cream.png), [Model Black](scenario-b-model-front-black.png), [Model Cream](scenario-b-model-front-cream.png) |
+| C: Explicit reuse | One IndexedDB binary for Navy/Black; independent Black override produces one additional file and no duplicate card | [Reuse and deliberate low contrast](scenario-c-low-contrast.png) |
+| D: Low contrast | Dark artwork intentionally published on Navy/Black without switching to Cream | [Capture](scenario-c-low-contrast.png) |
+| E: Persistence | Draft refresh and library reopen preserve variants/files/background/default; disabling default blocks publication until explicit replacement | [Mobile detail](scenario-e-mobile.png) |
+
+The B scenario deliberately reverses ink contrast on the back to prove independent back assignment and that the application does not override admin intent. Its `scenario-b-{product,model}-back-{black,cream}.png` captures therefore include intentional low contrast, not a failed colour resolver.
+
+Editor captures reviewed at [desktop 1672×941](variant-editor-desktop.png), [tablet 1086×1448](variant-editor-tablet.png), [phone 390×844](variant-editor-mobile.png). Full-page captures include scrolling form content; all controls remain accessible. The original-artwork frame overflow found during review was corrected and recaptured. [How It Works mobile](how-it-works-mobile.png) shows the added section; keyboard navigation was checked from `/`, `/designs`, `/designs/the-climb` and `/customize` at 1440px and 390px.
+
+### Landing and unchanged layouts
+
+The existing bounded hero geometry is retained. All nine required 100% zoom sizes were recaptured and visually reviewed: **360×800, 390×844, 768×1024, 820×1180, 1024×768, 1280×800, 1366×768, 1440×900, 1920×1080**. All have scale 1, visible CTAs, no nav/text/art collision, no unintended image crop, no horizontal overflow and no excessive tablet blank region. The homepage now scrolls below the hero to How It Works; the hero itself still fits the tested initial viewports. [Measurements](landing-viewports.json); individual `landing-WIDTHxHEIGHT.png` captures are listed in the previous viewport table below.
+
+All 24 reference-sized captures were refreshed and reviewed: **zero missing images, horizontal overflow and browser/runtime/HTTP errors**. Gallery card geometry and detail column/reflow structures remain intact. Gallery artwork/background now intentionally reflects the migrated Navy default instead of the former fixed thumbnail; detail original backgrounds now follow selection. Create/Edit workflow and the new homepage process are the expressly requested layout additions. Login, dashboard, customize and requests/orders retain their approved composition. Source files, logo, fonts, palette, hero and fabric mockups are unchanged.
+
+### Remaining limitations
+
+No functional blocker remains from the requested scenarios. This remains a frontend-only demo with browser-local records, IndexedDB files and demonstrative authentication. Real fulfillment, a backend and automatic messaging are outside scope. The supplied hero facial geometry/right hair edge still differs from the authoritative reference. It was not redrawn or distorted; `HeroArtwork` remains replaceable, and pixel-exact landing artwork approval remains open.
+
+### Files modified
+
+`app/page.tsx`; `app/admin/(portal)/designs/new/page.tsx`; `components/admin/{CreateDesign,VariantPanel,AdminSections}.tsx`; `components/design-preview/{Controls,DesignDetail,Mockup}.tsx`; `components/gallery/DesignCard.tsx`; `components/site/{Header,HowItWorks}.tsx`; `lib/hooks.ts`; `services/{artwork,repository}.ts`; `types/index.ts`; `styles/{globals,landing,variants}.css`; `tests/{frontend,corrections,variants}.spec.ts`; `tests/variant-helpers.ts`; `qa/{capture-variants,landing-viewports}.mjs`; `qa/landing-viewports.json`; `README.md`; this report; root `PROJECT_STATUS.md` and `REFERENCE_MAP.md`.
+
+## Previous correction pass — superseded variant rules
 
 The latest user instruction approves the existing website overall and limits this pass to landing responsiveness, public/admin navigation, uploaded artwork variants and regression/data checks. The supplied hero drawing mismatch remains explicitly unresolved; no new pixel-exact landing approval is claimed. Existing artwork, palette, font families and unrelated page designs were preserved.
 

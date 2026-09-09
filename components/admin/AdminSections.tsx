@@ -73,7 +73,7 @@ export function AdminSections({
           <p>{previewDesign.description}</p>
           <Mockup
             design={previewDesign}
-            colour={previewDesign.colours?.[0] || "navy"}
+            colour={previewDesign.defaultColour || "navy"}
             side={previewDesign.sides?.[0] || "front"}
             view="product"
           />
@@ -94,6 +94,11 @@ export function AdminSections({
               Create Design
             </Link>
           </div>
+          {notice && (
+            <p className="error" role="alert">
+              {notice}
+            </p>
+          )}
           <div className="admin-library">
             {designs
               .filter((d) =>
@@ -110,6 +115,12 @@ export function AdminSections({
                     }
                   />
                   <div className="library-actions">
+                    <Link
+                      className="button secondary"
+                      href={`/admin/designs/new?edit=${encodeURIComponent(d.id)}`}
+                    >
+                      Edit design
+                    </Link>
                     <span className="badge">
                       {d.published ? "Published" : "Draft"}
                     </span>
@@ -126,9 +137,13 @@ export function AdminSections({
                     {!d.published && (
                       <button
                         className="button"
-                        onClick={() =>
-                          repository.updateDesign(d.id, { published: true })
-                        }
+                        onClick={() => {
+                          try {
+                            repository.updateDesign(d.id, { published: true });
+                          } catch (e) {
+                            setNotice((e as Error).message);
+                          }
+                        }}
                       >
                         Publish
                       </button>

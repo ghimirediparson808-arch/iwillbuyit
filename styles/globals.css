@@ -5584,3 +5584,25 @@ tr:last-child td {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Availability reflects admin configuration; all three swatches remain visible. */
+.colour-option:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+.colour-option:disabled .swatch {
+  position: relative;
+}
+.colour-option:disabled .swatch::after {
+  content: "";
+  position: absolute;
+  left: -12%;
+  top: 47%;
+  width: 124%;
+  height: 2px;
+  background: #687685;
+  transform: rotate(-45deg);
+  box-shadow: 0 0 0 1px var(--panel);
+}
+.artwork-surface.artwork-black {
+  background: #111111;
+}

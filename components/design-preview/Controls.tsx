@@ -12,11 +12,17 @@ export function ColourControl({
 }) {
   return (
     <div className="colour-options" role="group" aria-label="T-shirt colour">
-      {allowed.map((c) => (
+      {(["navy", "black", "cream"] as Colour[]).map((c) => (
         <button
           type="button"
           key={c}
           className={`colour-option ${c === value ? "selected" : ""}`}
+          disabled={!allowed.includes(c)}
+          aria-label={
+            allowed.includes(c)
+              ? c[0].toUpperCase() + c.slice(1)
+              : `${c[0].toUpperCase() + c.slice(1)} — unavailable for this design`
+          }
           onClick={() => onChange(c)}
           aria-pressed={c === value}
         >

@@ -1,6 +1,7 @@
 import seed from "@/data/designs.json";
 import adminSeed from "@/data/admin-seed.json";
 import type { Design, RequestRecord } from "@/types";
+import { migrateDesign, publicationErrors } from "./artwork";
 const prefix = "iwbi-v1-";
 function read<T>(key: string, fallback: T): T {
   if (typeof window === "undefined") return fallback;
@@ -23,7 +24,7 @@ function write(key: string, value: unknown, notify = true) {
 }
 export const asset = (path: string) =>
   path.startsWith("../") ? "/assets/" + path.slice(3) : path;
-export const launchDesigns: Design[] = seed.map((d) => ({
+const rawLaunchDesigns: Design[] = seed.map((d) => ({
   ...d,
   lightShirtAsset: asset(d.lightShirtAsset),
   darkShirtAsset: asset(d.darkShirtAsset),
@@ -31,22 +32,48 @@ export const launchDesigns: Design[] = seed.map((d) => ({
   available: true,
   published: true,
 }));
+export const launchDesigns = rawLaunchDesigns.map(migrateDesign);
 export const repository = {
   designs(includeDrafts = false): Design[] {
-    const all = [...launchDesigns, ...read<Design[]>("designs", [])];
+    const all = [...rawLaunchDesigns, ...read<Design[]>("designs", [])];
     const overrides = read<Record<string, Partial<Design>>>(
       "design-updates",
       {},
     );
     return all
-      .map((d) => ({ ...d, ...overrides[d.id] }))
+      .map((d) => migrateDesign({ ...d, ...overrides[d.id] }))
       .filter((d) => includeDrafts || d.published !== false);
   },
   saveDesign(design: Design) {
     const entries = read<Design[]>("designs", []);
-    write("designs", [...entries.filter((d) => d.id !== design.id), design]);
+    if (design.published) {
+      const errors = publicationErrors(migrateDesign(design));
+      if (errors.length) throw new Error(errors.join(" "));
+    }
+    if (launchDesigns.some((d) => d.id === design.id)) {
+      repository.updateDesign(design.id, design);
+      return;
+    }
+    const index = entries.findIndex((d) => d.id === design.id);
+    if (index < 0) entries.push(design);
+    else entries[index] = design;
+    write("designs", entries);
+    const overrides = read<Record<string, Partial<Design>>>(
+      "design-updates",
+      {},
+    );
+    if (overrides[design.id]) {
+      delete overrides[design.id];
+      write("design-updates", overrides);
+    }
   },
   updateDesign(id: string, patch: Partial<Design>) {
+    if (patch.published) {
+      const design = repository.designs(true).find((d) => d.id === id);
+      if (!design) throw new Error("Design not found.");
+      const errors = publicationErrors(migrateDesign({ ...design, ...patch }));
+      if (errors.length) throw new Error(errors.join(" "));
+    }
     const values = read<Record<string, Partial<Design>>>("design-updates", {});
     write("design-updates", { ...values, [id]: { ...values[id], ...patch } });
   },

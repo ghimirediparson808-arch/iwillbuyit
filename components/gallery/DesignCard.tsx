@@ -17,7 +17,7 @@ export function DesignCard({
     <article className="design-card">
       <Link
         href={href}
-        className={`card-art ${design.artworkVariants ? "artwork-surface artwork-" + artwork.tone : ""}`}
+        className={`card-art ${design.variants ? "artwork-surface artwork-" + artwork.tone : ""}`}
         aria-label={`Inspect ${design.name}`}
       >
         {src ? (

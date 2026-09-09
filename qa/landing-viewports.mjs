@@ -48,7 +48,7 @@ for (const [width, height] of sizes) {
       art,
       image,
       actions,
-      artCropped: art.bottom > document.documentElement.scrollHeight + 1,
+      artCropped: art.bottom > box(".hero").bottom + 1,
       scrollHeight: document.documentElement.scrollHeight,
       overflow: document.documentElement.scrollWidth > innerWidth,
       navCollision: overlap(nav, art) || overlap(nav, copy),
@@ -63,7 +63,7 @@ for (const [width, height] of sizes) {
   console.log(width, height, JSON.stringify(geometry));
   await page.screenshot({
     path: `qa/landing-${width}x${height}.png`,
-    fullPage: true,
+    fullPage: false,
   });
 }
 fs.writeFileSync(

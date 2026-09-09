@@ -35,33 +35,38 @@ export function useDesigns(includeDrafts = false) {
   return designs;
 }
 export function useAsset(source?: string) {
-  const [url, setUrl] = useState(
-    source?.startsWith("upload:") ? "" : source || "",
-  );
+  const [resolved, setResolved] = useState({
+    source,
+    url: source?.startsWith("upload:") ? "" : source || "",
+  });
   useEffect(() => {
     let live = true;
     let objectUrl = "";
     if (!source?.startsWith("upload:")) {
-      setUrl(source || "");
+      setResolved({ source, url: source || "" });
       return;
     }
-    setUrl("");
+    setResolved({ source, url: "" });
     loadUpload(source.slice(7))
       .then((blob) => {
         if (blob && live) {
           objectUrl = URL.createObjectURL(blob);
-          setUrl(objectUrl);
+          setResolved({ source, url: objectUrl });
         }
       })
       .catch(() => {
-        if (live) setUrl("");
+        if (live) setResolved({ source, url: "" });
       });
     return () => {
       live = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [source]);
-  return url;
+  return resolved.source === source
+    ? resolved.url
+    : source?.startsWith("upload:")
+      ? ""
+      : source || "";
 }
 
 export function useRequests() {

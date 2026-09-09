@@ -8,14 +8,21 @@ export function Mockup({
   colour = "navy",
   side = "front",
   view = "product",
+  artworkUrl,
 }: {
   design?: Design;
   colour?: Colour;
   side?: Side;
   view?: View;
+  artworkUrl?: string;
 }) {
   const rule = placement[view][side];
-  const art = useAsset(design ? printArtwork(design, colour) : undefined);
+  const loadedArt = useAsset(
+    artworkUrl === undefined && design
+      ? printArtwork(design, colour, side)
+      : undefined,
+  );
+  const art = artworkUrl ?? loadedArt;
   return (
     <div className={`mockup mockup-${view}`}>
       <img
@@ -33,10 +40,7 @@ export function Mockup({
             top: `${rule.yPercent}%`,
             width: `${rule.widthPercent}%`,
             height: `${rule.heightPercent}%`,
-            mixBlendMode:
-              !design?.artworkVariants && colour === "cream"
-                ? "multiply"
-                : "normal",
+            mixBlendMode: "normal",
           }}
         />
       )}

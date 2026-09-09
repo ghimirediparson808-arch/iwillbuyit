@@ -3,6 +3,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, Search, Moon, Sun, X, LockKeyhole } from "lucide-react";
+import { scrollToHowItWorks } from "./HowItWorks";
 export function Header() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -38,12 +39,19 @@ export function Header() {
           ["/", "Home"],
           ["/designs", "Design Gallery"],
           ["/customize", "Customize"],
-          ["/customize#how-it-works", "How It Works"],
+          ["/#how-it-works", "How It Works"],
         ].map(([href, label]) => (
           <Link
             key={href}
             href={href}
-            onClick={() => setOpen(false)}
+            onClick={(event) => {
+              setOpen(false);
+              if (href === "/#how-it-works" && path === "/") {
+                event.preventDefault();
+                window.history.pushState(null, "", "/#how-it-works");
+                scrollToHowItWorks();
+              }
+            }}
             className={
               (href === "/" ? path === "/" : path.startsWith(href))
                 ? "active"
