@@ -70,13 +70,13 @@ export function Login() {
         <h2>Admin Portal</h2>
         <p className="login-subtitle">Demo access for I WILL BUY IT</p>
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
             const data = new FormData(e.currentTarget);
             setError("");
             setBusy(true);
             try {
-              demoAuth.signIn(
+              await demoAuth.signIn(
                 String(data.get("email")),
                 String(data.get("password")),
                 data.has("remember"),

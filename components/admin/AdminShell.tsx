@@ -44,8 +44,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     if (!demoAuth.signedIn()) router.replace("/admin/login");
     else setReady(true);
   }, [router]);
-  function logout() {
-    demoAuth.signOut();
+  async function logout() {
+    await demoAuth.signOut();
     router.replace("/admin/login");
   }
   if (!ready)
