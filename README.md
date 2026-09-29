@@ -98,3 +98,5 @@ The earlier hero source mismatch remains explicitly unresolved: the supplied por
 All eight page layouts were recaptured at the supplied desktop/tablet/mobile dimensions. Nine additional landing screenshots at 100% zoom and the paired-variant verification screenshots are in `qa/`. See the QA report for results, source constraints and the admin-controlled per-colour workflow.
 
 Root continuity documents: `../AGENTS.md`, `../PROJECT_STATUS.md`, `../REFERENCE_MAP.md`.
+deployment trigger
+
