@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 
+const isProd = process.env.NODE_ENV === "production";
+
 function openDB(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     if (typeof window === "undefined" || !window.indexedDB) {
@@ -22,18 +24,20 @@ export async function saveUpload(
   const ext = file.type === "image/jpeg" ? "jpg" : file.type === "image/webp" ? "webp" : "png";
   const filename = `${id}.${ext}`;
 
-  // Try saving to IndexedDB as local fallback
-  try {
-    const db = await openDB();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction("files", "readwrite");
-      tx.objectStore("files").put(file, id);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(new Error("Could not save to IndexedDB"));
-    });
-    db.close();
-  } catch {
-    // Continue even if IndexedDB is not supported
+  // Dev mode local IndexedDB fallback
+  if (!isProd) {
+    try {
+      const db = await openDB();
+      await new Promise<void>((resolve, reject) => {
+        const tx = db.transaction("files", "readwrite");
+        tx.objectStore("files").put(file, id);
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(new Error("Could not save to IndexedDB"));
+      });
+      db.close();
+    } catch {
+      // ignore in dev
+    }
   }
 
   // Upload to Supabase Storage
@@ -49,37 +53,41 @@ export async function saveUpload(
     if (!error && data?.path) {
       return data.path;
     }
-  } catch {
-    // Fall back to returning local UUID
+    if (error && isProd) {
+      throw new Error(`Upload failed: ${error.message}`);
+    }
+  } catch (err: unknown) {
+    if (isProd) throw err;
   }
 
   return id;
 }
 
 export async function loadUpload(id: string): Promise<Blob | undefined> {
-  // Try loading from IndexedDB first
-  try {
-    const db = await openDB();
-    const result = await new Promise<Blob | undefined>((resolve, reject) => {
-      const request = db.transaction("files").objectStore("files").get(id);
-      request.onsuccess = () => {
-        resolve(request.result);
-        db.close();
-      };
-      request.onerror = () => {
-        reject(request.error);
-        db.close();
-      };
-    });
-    if (result) return result;
-  } catch {
-    // Fall through to Supabase Storage
+  // Check IndexedDB in dev mode first
+  if (!isProd) {
+    try {
+      const db = await openDB();
+      const result = await new Promise<Blob | undefined>((resolve, reject) => {
+        const request = db.transaction("files").objectStore("files").get(id);
+        request.onsuccess = () => {
+          resolve(request.result);
+          db.close();
+        };
+        request.onerror = () => {
+          reject(request.error);
+          db.close();
+        };
+      });
+      if (result) return result;
+    } catch {
+      // ignore
+    }
   }
 
-  // Try loading from Supabase Storage
+  // Download from Supabase Storage
   try {
     const supabase = createClient();
-    // Try design-assets first, then request-uploads
     let res = await supabase.storage.from("design-assets").download(id);
     if (!res.error && res.data) return res.data;
 

@@ -3,8 +3,10 @@ import type { Design, RequestRecord } from "@/types";
 import { migrateDesign, publicationErrors } from "./artwork";
 import { read, write } from "./storage";
 import { commerceActions } from "./commerce";
+
 export const asset = (path: string) =>
   path.startsWith("../") ? "/assets/" + path.slice(3) : path;
+
 const rawLaunchDesigns: Design[] = seed.map((d) => ({
   ...d,
   lightShirtAsset: asset(d.lightShirtAsset),
@@ -13,7 +15,9 @@ const rawLaunchDesigns: Design[] = seed.map((d) => ({
   available: true,
   published: true,
 }));
+
 export const launchDesigns = rawLaunchDesigns.map(migrateDesign);
+
 export const repository = {
   ...commerceActions,
   designs(includeDrafts = false): Design[] {
@@ -122,7 +126,7 @@ export const repository = {
   settings() {
     return read("settings", {
       instagram: "",
-      whatsapp: "",
+      whatsapp: "9813115554",
       brand: "I WILL BUY IT",
     });
   },
@@ -136,6 +140,7 @@ export const repository = {
     write("stock", value);
   },
 };
+
 export function newRequest(
   values: Omit<
     RequestRecord,
@@ -153,7 +158,12 @@ export function newRequest(
     activity: [{ text: "Request submitted", at }],
   };
 }
+
 export function whatsappUrl(message: string, phone?: string) {
-  const number = (phone ?? repository.settings().whatsapp).replace(/\D/g, "");
+  const defaultNumber = "9779813115554";
+  let number = defaultNumber;
+  if (phone && phone.replace(/\D/g, "").length >= 7) {
+    number = phone.replace(/\D/g, "");
+  }
   return `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 }

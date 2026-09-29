@@ -1,50 +1,54 @@
 import { createClient } from "@/lib/supabase/client";
 
-const key = "iwbi-demo-session";
+const sessionKey = "iwbi-demo-session";
+const isProd = process.env.NODE_ENV === "production";
 
 export const demoAuth = {
   email: "admin@iwillbuyit.com",
   password: "PrintWithPurpose",
   signedIn() {
     if (typeof window === "undefined") return false;
-    const local =
-      localStorage.getItem(key) === "demo" ||
-      sessionStorage.getItem(key) === "demo";
-    if (local) return true;
     const supabaseKey = Object.keys(localStorage).find(
       (k) => k.startsWith("sb-") && k.endsWith("-auth-token"),
     );
-    return !!supabaseKey;
+    if (supabaseKey) return true;
+
+    // Local session check permitted only in non-production
+    if (!isProd) {
+      return (
+        localStorage.getItem(sessionKey) === "demo" ||
+        sessionStorage.getItem(sessionKey) === "demo"
+      );
+    }
+    return false;
   },
   async signIn(email: string, password: string, remember: boolean) {
-    if (!email.trim() || !password) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail || !password) {
       throw new Error("Enter an admin email and password.");
     }
+
     try {
       const supabase = createClient();
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: trimmedEmail,
         password,
       });
+
       if (error) {
-        if (
-          email.trim().toLowerCase() === this.email &&
-          password === this.password
-        ) {
-          (remember ? localStorage : sessionStorage).setItem(key, "demo");
+        if (!isProd && trimmedEmail.toLowerCase() === this.email && password === this.password) {
+          (remember ? localStorage : sessionStorage).setItem(sessionKey, "demo");
           return;
         }
-        throw new Error(error.message || "Invalid login credentials.");
+        throw new Error(error.message || "Invalid admin login credentials.");
       }
+
       if (data.session) {
-        (remember ? localStorage : sessionStorage).setItem(key, "demo");
+        (remember ? localStorage : sessionStorage).setItem(sessionKey, "demo");
       }
     } catch (err: unknown) {
-      if (
-        email.trim().toLowerCase() === this.email &&
-        password === this.password
-      ) {
-        (remember ? localStorage : sessionStorage).setItem(key, "demo");
+      if (!isProd && trimmedEmail.toLowerCase() === this.email && password === this.password) {
+        (remember ? localStorage : sessionStorage).setItem(sessionKey, "demo");
         return;
       }
       throw err;
@@ -52,13 +56,13 @@ export const demoAuth = {
   },
   async signOut() {
     if (typeof window !== "undefined") {
-      localStorage.removeItem(key);
-      sessionStorage.removeItem(key);
+      localStorage.removeItem(sessionKey);
+      sessionStorage.removeItem(sessionKey);
       try {
         const supabase = createClient();
         await supabase.auth.signOut();
       } catch {
-        // ignore offline logout errors
+        // Ignore offline logout exceptions
       }
     }
   },
